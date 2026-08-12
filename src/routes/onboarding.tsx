@@ -88,10 +88,19 @@ function Onboarding() {
   }, [step]);
 
   function next() {
-    if (name.trim().length < 2) return toast.error("Tell us your name");
-    if (!/^[6-9]\d{9}$/.test(whatsapp)) return toast.error("Enter a valid 10-digit WhatsApp number");
+    if (name.trim().length < 2) {
+      toast.error("Tell us your name");
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(whatsapp)) {
+      toast.error("Enter a valid 10-digit WhatsApp number");
+      return;
+    }
     const n = Number(age);
-    if (!n || n < 13 || n > 99) return toast.error("Enter an age between 13 and 99");
+    if (!n || n < 13 || n > 99) {
+      toast.error("Enter an age between 13 and 99");
+      return;
+    }
     setStep(2);
   }
 
