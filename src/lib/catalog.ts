@@ -1,28 +1,3 @@
-import terraTee from "@/assets/terra-tee.jpg";
-import driftShirt from "@/assets/drift-shirt.jpg";
-import atlasTrouser from "@/assets/atlas-trouser.jpg";
-import nimbusOvershirt from "@/assets/nimbus-overshirt.jpg";
-import koraPolo from "@/assets/kora-polo.jpg";
-import roveCargo from "@/assets/rove-cargo.jpg";
-import heroCampaign from "@/assets/hero-campaign.jpg";
-import fabricDetail from "@/assets/fabric-detail.jpg";
-
-export const productImages: Record<string, string> = {
-  "terra-tee": terraTee,
-  "drift-shirt": driftShirt,
-  "atlas-trouser": atlasTrouser,
-  "nimbus-overshirt": nimbusOvershirt,
-  "kora-polo": koraPolo,
-  "rove-cargo": roveCargo,
-};
-
-export const heroImage = heroCampaign;
-export const fabricImage = fabricDetail;
-
-export function imageFor(key: string): string {
-  return productImages[key] ?? terraTee;
-}
-
 export function inr(value: number): string {
   return `₹${value.toLocaleString("en-IN")}`;
 }
@@ -35,6 +10,8 @@ export type Product = {
   description: string;
   story: string | null;
   category: string;
+  subcategory: string | null;
+  gender: string;
   price_inr: number;
   compare_at_inr: number | null;
   fabric: string | null;
@@ -45,7 +22,14 @@ export type Product = {
   rating: number;
   review_count: number;
   is_featured: boolean;
+  is_published: boolean;
   sort_order: number;
+  mood_tags: string[];
+  vibe_tags: string[];
+  occasion_tags: string[];
+  size_chart: Record<string, Record<string, string>> | null;
+  seo_title: string | null;
+  seo_description: string | null;
 };
 
 export type Variant = {
@@ -58,17 +42,61 @@ export type Variant = {
   stock: number;
   price_delta: number;
   sort_order: number;
+  image_key: string | null;
+  swatch_url: string | null;
+};
+
+export type ProductImage = {
+  id: string;
+  product_id: string;
+  variant_id: string | null;
+  color_name: string | null;
+  url: string;
+  alt: string | null;
+  sort_order: number;
 };
 
 export type Review = {
   id: string;
   product_id: string | null;
+  user_id: string | null;
+  order_id: string | null;
   author: string;
   city: string | null;
   rating: number;
   title: string;
   body: string;
+  variant_label: string | null;
+  photos: string[];
+  helpful_count: number;
+  status: string;
   is_verified: boolean;
+  created_at: string;
+};
+
+export type Collection = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string | null;
+  icon: string | null;
+  mood_key: string | null;
+  hero_gradient: string | null;
+  is_published: boolean;
+  sort_order: number;
+};
+
+export type Coupon = {
+  id: string;
+  code: string;
+  title: string;
+  description: string | null;
+  kind: string;
+  value: number;
+  min_cart: number;
+  max_discount: number | null;
+  expires_at: string | null;
+  is_active: boolean;
 };
 
 export type SiteSettings = {
@@ -80,15 +108,41 @@ export type SiteSettings = {
   return_window_days: number;
 };
 
+const PLACEHOLDER =
+  "data:image/svg+xml;utf8," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750"><rect width="600" height="750" fill="#fbe9ee"/></svg>`,
+  );
+
+/** Resolve the display image for a product from its image rows. */
+export function imageFor(images: ProductImage[] | undefined, fallback?: string | null): string {
+  if (images && images.length > 0) return images[0]!.url;
+  return fallback || PLACEHOLDER;
+}
+
+export const imagePlaceholder = PLACEHOLDER;
+
+export function discountPct(price: number, compareAt: number | null): number {
+  if (!compareAt || compareAt <= price) return 0;
+  return Math.round(((compareAt - price) / compareAt) * 100);
+}
+
 export const TRACKING_STEPS = [
-  { key: "placed", label: "Order placed" },
-  { key: "confirmed", label: "Confirmed" },
-  { key: "packed", label: "Packed" },
-  { key: "shipped", label: "Shipped" },
-  { key: "in_transit", label: "In transit" },
-  { key: "out_for_delivery", label: "Out for delivery" },
-  { key: "delivered", label: "Delivered" },
+  { key: "placed", label: "Order placed", note: "We got your order" },
+  { key: "confirmed", label: "Confirmed", note: "Payment & stock confirmed" },
+  { key: "packed", label: "Packed", note: "Wrapped with a bow" },
+  { key: "shipped", label: "Shipped", note: "Handed to the courier" },
+  { key: "in_transit", label: "In transit", note: "On the way to your city" },
+  { key: "out_for_delivery", label: "Out for delivery", note: "Arriving today" },
+  { key: "delivered", label: "Delivered", note: "Enjoy it!" },
 ] as const;
+
+export type TrackingStepKey = (typeof TRACKING_STEPS)[number]["key"];
+
+export function stepIndex(status: string): number {
+  const i = TRACKING_STEPS.findIndex((s) => s.key === status);
+  return i < 0 ? 0 : i;
+}
 
 export function deliveryEstimate(days = 4): string {
   const d = new Date();
