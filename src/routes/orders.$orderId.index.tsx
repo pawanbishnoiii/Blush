@@ -8,7 +8,7 @@ import { orderDetailQuery } from "@/lib/queries";
 import { inr, TRACKING_STEPS, stepIndex } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/orders/$orderId")({
+export const Route = createFileRoute("/orders/$orderId/")({
   head: () => ({
     meta: [
       { title: "Order details — Blush" },
