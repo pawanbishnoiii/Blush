@@ -50,12 +50,12 @@ function Onboarding() {
       }
       setUserId(data.user.id);
       const meta = data.user.user_metadata ?? {};
-      setName((meta.full_name as string) ?? (meta.name as string) ?? "");
+      setName((meta['full_name'] as string) ?? (meta['name'] as string) ?? "");
     });
   }, [navigate]);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     const ctx = gsap.context(() => {
       gsap.from(cardRef.current, {
         y: 40,
@@ -76,7 +76,7 @@ function Onboarding() {
   }, []);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     const ctx = gsap.context(() => {
       gsap.fromTo(
         stepRef.current,
@@ -88,10 +88,19 @@ function Onboarding() {
   }, [step]);
 
   function next() {
-    if (name.trim().length < 2) return toast.error("Tell us your name");
-    if (!/^[6-9]\d{9}$/.test(whatsapp)) return toast.error("Enter a valid 10-digit WhatsApp number");
+    if (name.trim().length < 2) {
+      toast.error("Tell us your name");
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(whatsapp)) {
+      toast.error("Enter a valid 10-digit WhatsApp number");
+      return;
+    }
     const n = Number(age);
-    if (!n || n < 13 || n > 99) return toast.error("Enter an age between 13 and 99");
+    if (!n || n < 13 || n > 99) {
+      toast.error("Enter an age between 13 and 99");
+      return;
+    }
     setStep(2);
   }
 
