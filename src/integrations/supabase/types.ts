@@ -151,6 +151,60 @@ export type Database = {
         }
         Relationships: []
       }
+      banners: {
+        Row: {
+          created_at: string
+          cta_label: string | null
+          ends_at: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          link_url: string | null
+          mobile_image_url: string | null
+          mood_key: string | null
+          placement: string
+          sort_order: number
+          starts_at: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta_label?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          link_url?: string | null
+          mobile_image_url?: string | null
+          mood_key?: string | null
+          placement?: string
+          sort_order?: number
+          starts_at?: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta_label?: string | null
+          ends_at?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          link_url?: string | null
+          mobile_image_url?: string | null
+          mood_key?: string | null
+          placement?: string
+          sort_order?: number
+          starts_at?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       collection_products: {
         Row: {
           collection_id: string
@@ -316,6 +370,63 @@ export type Database = {
           usage_limit?: number | null
           used_count?: number
           value?: number
+        }
+        Relationships: []
+      }
+      delivery_providers: {
+        Row: {
+          api_base_url: string | null
+          api_key_secret_name: string | null
+          code: string
+          created_at: string
+          id: string
+          is_enabled: boolean
+          logo_url: string | null
+          max_days: number
+          min_days: number
+          name: string
+          priority: number
+          serviceable_pincode_prefixes: string[]
+          supports_cod: boolean
+          supports_reverse_pickup: boolean
+          tracking_url_pattern: string | null
+          updated_at: string
+        }
+        Insert: {
+          api_base_url?: string | null
+          api_key_secret_name?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          logo_url?: string | null
+          max_days?: number
+          min_days?: number
+          name: string
+          priority?: number
+          serviceable_pincode_prefixes?: string[]
+          supports_cod?: boolean
+          supports_reverse_pickup?: boolean
+          tracking_url_pattern?: string | null
+          updated_at?: string
+        }
+        Update: {
+          api_base_url?: string | null
+          api_key_secret_name?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          logo_url?: string | null
+          max_days?: number
+          min_days?: number
+          name?: string
+          priority?: number
+          serviceable_pincode_prefixes?: string[]
+          supports_cod?: boolean
+          supports_reverse_pickup?: boolean
+          tracking_url_pattern?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -726,11 +837,13 @@ export type Database = {
       }
       profiles: {
         Row: {
+          age: number | null
           avatar_url: string | null
           birthday: string | null
           created_at: string
           display_name: string | null
           favourite_colours: string[]
+          gender: string | null
           id: string
           language: string
           onboarded: boolean
@@ -742,13 +855,16 @@ export type Database = {
           skin_tone: string | null
           tier: string
           updated_at: string
+          whatsapp: string | null
         }
         Insert: {
+          age?: number | null
           avatar_url?: string | null
           birthday?: string | null
           created_at?: string
           display_name?: string | null
           favourite_colours?: string[]
+          gender?: string | null
           id: string
           language?: string
           onboarded?: boolean
@@ -760,13 +876,16 @@ export type Database = {
           skin_tone?: string | null
           tier?: string
           updated_at?: string
+          whatsapp?: string | null
         }
         Update: {
+          age?: number | null
           avatar_url?: string | null
           birthday?: string | null
           created_at?: string
           display_name?: string | null
           favourite_colours?: string[]
+          gender?: string | null
           id?: string
           language?: string
           onboarded?: boolean
@@ -778,6 +897,7 @@ export type Database = {
           skin_tone?: string | null
           tier?: string
           updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }

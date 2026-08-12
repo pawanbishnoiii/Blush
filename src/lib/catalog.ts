@@ -153,3 +153,10 @@ export function deliveryEstimate(days = 4): string {
   d.setDate(d.getDate() + days);
   return d.toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" });
 }
+
+/* ---------- Editorial imagery ---------- */
+import heroBanner from "@/assets/hero-banner.webp.asset.json";
+import fabricDetail from "@/assets/fabric-detail.jpg";
+
+export const heroImage: string = heroBanner.url;
+export const fabricImage: string = fabricDetail;
