@@ -78,12 +78,14 @@ export const SIZING: IconEntry[] = [
   { icon: "size-guide", label: "Size Guide" },
   { icon: "size-chart", label: "Size Chart" },
   { icon: "measurements", label: "Measurements" },
+  { icon: "tools", label: "Styling Tools" },
 ];
 
 export const MISC_ICONS: IconEntry[] = [
   { icon: "messages", label: "Messages" },
   { icon: "rewards", label: "Rewards" },
 ];
+
 
 /** Mood system — drives hero, copy and product recommendations. */
 export type MoodKey =
