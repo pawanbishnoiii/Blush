@@ -57,7 +57,10 @@ function AdminDelivery() {
     toast.success("Courier added");
   }
 
-  async function patch(p: DeliveryProvider, values: Record<string, unknown>) {
+  async function patch(
+    p: DeliveryProvider,
+    values: { priority?: number; is_enabled?: boolean },
+  ) {
     const { error } = await supabase.from("delivery_providers").update(values).eq("id", p.id);
     if (error) {
       toast.error(error.message);
