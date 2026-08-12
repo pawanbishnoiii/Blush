@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "bbff7f73-c13e-449e-b11f-c866e62e8af9",
-  "project_id": "da97be80-138e-42be-afc9-6f46ad2a77d2",
-  "url": "/__l5e/assets-v1/bbff7f73-c13e-449e-b11f-c866e62e8af9/nails.webp",
-  "r2_key": "a/v1/da97be80-138e-42be-afc9-6f46ad2a77d2/bbff7f73-c13e-449e-b11f-c866e62e8af9/nails.webp",
-  "original_filename": "nails.webp",
-  "size": 9372,
   "content_type": "image/webp",
-  "created_at": "2026-08-12T11:47:17Z"
+  "created_at": "2026-08-12T11:47:17Z",
+  "original_filename": "nails.webp",
+  "project_id": "ddf40b10-6795-4b11-a0b0-460c2cf96224",
+  "r2_key": "a/v1/ddf40b10-6795-4b11-a0b0-460c2cf96224/bbff7f73-c13e-449e-b11f-c866e62e8af9/nails.webp",
+  "size": 9372,
+  "url": "/__l5e/assets-v1/bbff7f73-c13e-449e-b11f-c866e62e8af9/nails.webp",
+  "version": 1
 }

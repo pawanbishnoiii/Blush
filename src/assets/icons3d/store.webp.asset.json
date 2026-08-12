@@ -1,11 +1,11 @@
 {
-  "version": 1,
   "asset_id": "ff6fc29d-7698-4871-a57b-286ee5d24f60",
-  "project_id": "da97be80-138e-42be-afc9-6f46ad2a77d2",
-  "url": "/__l5e/assets-v1/ff6fc29d-7698-4871-a57b-286ee5d24f60/store.webp",
-  "r2_key": "a/v1/da97be80-138e-42be-afc9-6f46ad2a77d2/ff6fc29d-7698-4871-a57b-286ee5d24f60/store.webp",
-  "original_filename": "store.webp",
-  "size": 11102,
   "content_type": "image/webp",
-  "created_at": "2026-08-12T11:47:58Z"
+  "created_at": "2026-08-12T11:47:58Z",
+  "original_filename": "store.webp",
+  "project_id": "ddf40b10-6795-4b11-a0b0-460c2cf96224",
+  "r2_key": "a/v1/ddf40b10-6795-4b11-a0b0-460c2cf96224/ff6fc29d-7698-4871-a57b-286ee5d24f60/store.webp",
+  "size": 11102,
+  "url": "/__l5e/assets-v1/ff6fc29d-7698-4871-a57b-286ee5d24f60/store.webp",
+  "version": 1
 }
