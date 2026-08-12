@@ -57,7 +57,7 @@ function AdminReviews() {
             <div className="flex flex-wrap items-start gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Stars value={r.rating} />
+                  <Stars rating={r.rating} />
                   <span className="truncate text-sm font-bold">{r.title}</span>
                   {r.is_verified && (
                     <span className="rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-bold text-success">
