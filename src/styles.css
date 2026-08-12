@@ -334,3 +334,44 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ---- cute interaction keyframes (kept subtle) ---- */
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%); }
+  60%, 100% { transform: translateX(100%); }
+}
+
+@keyframes heart-burst {
+  0% { transform: scale(0.4); opacity: 0; }
+  45% { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes sparkle-pop {
+  0% { transform: scale(0) rotate(0deg); opacity: 0; }
+  40% { transform: scale(1) rotate(90deg); opacity: 1; }
+  100% { transform: scale(0.2) rotate(180deg); opacity: 0; }
+}
+
+@keyframes bag-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-6px) scale(1.12); }
+  60% { transform: translateY(0) scale(0.95); }
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes truck-roll {
+  0% { transform: translateX(-8%); }
+  50% { transform: translateX(8%); }
+  100% { transform: translateX(-8%); }
+}
+
+@utility animate-heart-burst { animation: heart-burst 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+@utility animate-sparkle-pop { animation: sparkle-pop 0.7s ease-out forwards; }
+@utility animate-bag-bounce { animation: bag-bounce 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+@utility animate-float-soft { animation: float-soft 5s ease-in-out infinite; }
+@utility animate-truck-roll { animation: truck-roll 3.2s ease-in-out infinite; }
