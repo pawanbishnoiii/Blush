@@ -76,8 +76,9 @@ export function Icon3DTile({
 
   return (
     <motion.div
-      whileHover={reduce ? undefined : { y: -4, scale: 1.03 }}
+      {...(reduce ? {} : { whileHover: { y: -4, scale: 1.03 } })}
       transition={{ type: "spring", stiffness: 320, damping: 22 }}
+
       className={cn("flex min-w-0 flex-col items-center gap-2.5 text-center", className)}
     >
       <div
