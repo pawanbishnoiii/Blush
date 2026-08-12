@@ -5,9 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * ESKO design system — warm sand surfaces, ink type, clay accent, forest secondary.
+ * BLUSH design system — girls-first fashion + beauty.
+ * Blush pink primary, lilac secondary, peach accent, cream/white surfaces.
  * All colours are oklch tokens. Never hardcode colour utilities in components.
  */
+
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 6px);
