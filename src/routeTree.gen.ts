@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as OffersRouteImport } from './routes/offers'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PoliciesRouteImport } from './routes/policies'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
@@ -47,6 +48,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const OffersRoute = OffersRouteImport.update({
   id: '/offers',
   path: '/offers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PoliciesRoute = PoliciesRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/offers': typeof OffersRoute
+  '/onboarding': typeof OnboardingRoute
   '/policies': typeof PoliciesRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/offers': typeof OffersRoute
+  '/onboarding': typeof OnboardingRoute
   '/policies': typeof PoliciesRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/checkout': typeof CheckoutRoute
   '/offers': typeof OffersRoute
+  '/onboarding': typeof OnboardingRoute
   '/policies': typeof PoliciesRoute
   '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/offers'
+    | '/onboarding'
     | '/policies'
     | '/search'
     | '/shop'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/offers'
+    | '/onboarding'
     | '/policies'
     | '/search'
     | '/shop'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/checkout'
     | '/offers'
+    | '/onboarding'
     | '/policies'
     | '/search'
     | '/shop'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   CheckoutRoute: typeof CheckoutRoute
   OffersRoute: typeof OffersRoute
+  OnboardingRoute: typeof OnboardingRoute
   PoliciesRoute: typeof PoliciesRoute
   SearchRoute: typeof SearchRoute
   ShopRoute: typeof ShopRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/offers'
       fullPath: '/offers'
       preLoaderRoute: typeof OffersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/policies': {
@@ -321,6 +341,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   CheckoutRoute: CheckoutRoute,
   OffersRoute: OffersRoute,
+  OnboardingRoute: OnboardingRoute,
   PoliciesRoute: PoliciesRoute,
   SearchRoute: SearchRoute,
   ShopRoute: ShopRoute,
