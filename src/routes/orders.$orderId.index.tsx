@@ -74,7 +74,10 @@ function OrderDetail() {
 
   async function cancel() {
     const { error } = await supabase.from("orders").update({ status: "cancelled" }).eq("id", orderId);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await qc.invalidateQueries({ queryKey: ["order", orderId] });
     await qc.invalidateQueries({ queryKey: ["my_orders"] });
     toast.success("Order cancelled. Refund starts within 24 hours.");
@@ -82,7 +85,10 @@ function OrderDetail() {
 
   async function requestReturn() {
     const { error } = await supabase.from("orders").update({ status: "returned" }).eq("id", orderId);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await qc.invalidateQueries({ queryKey: ["order", orderId] });
     toast.success("Return requested — pickup will be scheduled.");
   }

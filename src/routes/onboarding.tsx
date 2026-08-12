@@ -50,12 +50,12 @@ function Onboarding() {
       }
       setUserId(data.user.id);
       const meta = data.user.user_metadata ?? {};
-      setName((meta.full_name as string) ?? (meta.name as string) ?? "");
+      setName((meta['full_name'] as string) ?? (meta['name'] as string) ?? "");
     });
   }, [navigate]);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     const ctx = gsap.context(() => {
       gsap.from(cardRef.current, {
         y: 40,
@@ -76,7 +76,7 @@ function Onboarding() {
   }, []);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return undefined;
     const ctx = gsap.context(() => {
       gsap.fromTo(
         stepRef.current,

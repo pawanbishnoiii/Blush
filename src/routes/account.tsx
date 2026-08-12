@@ -73,7 +73,10 @@ function AccountPage() {
       .from("profiles")
       .update({ display_name: name, whatsapp, phone: whatsapp, preferred_moods: moods })
       .eq("id", user!.id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await qc.invalidateQueries({ queryKey: ["my_profile"] });
     setEditing(false);
     toast.success("Profile updated");
