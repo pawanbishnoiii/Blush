@@ -178,10 +178,10 @@ export function ProductGallery({
             </button>
             <motion.img
               key={current.url}
-              initial={reduce ? undefined : { scale: 0.94 }}
-              animate={reduce ? undefined : { scale: 1 }}
+              {...(reduce ? {} : { initial: { scale: 0.94 }, animate: { scale: 1 } })}
               src={current.url}
               alt={current.alt ?? ""}
+
               className="max-h-[88vh] w-auto rounded-2xl object-contain"
               onClick={(e) => e.stopPropagation()}
             />
