@@ -50,11 +50,14 @@ function AdminBanners() {
   async function upload(file: File, key: "image_url" | "mobile_image_url") {
     setBusy(true);
     try {
-      const path = `banners/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-")}`;
-      const { error } = await supabase.storage.from("media").upload(path, file, { upsert: true });
+      const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-")}`;
+      const { error } = await supabase.storage.from("banners").upload(path, file, { upsert: true });
       if (error) throw error;
-      const { data } = supabase.storage.from("media").getPublicUrl(path);
-      setDraft((d) => ({ ...d, [key]: data.publicUrl }));
+      const { data, error: signErr } = await supabase.storage
+        .from("banners")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
+      if (signErr || !data) throw signErr ?? new Error("Could not create image URL");
+      setDraft((d) => ({ ...d, [key]: data.signedUrl }));
       toast.success("Image uploaded");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
