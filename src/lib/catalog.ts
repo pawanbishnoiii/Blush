@@ -114,9 +114,13 @@ const PLACEHOLDER =
     `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="750"><rect width="600" height="750" fill="#fbe9ee"/></svg>`,
   );
 
-/** Resolve the display image for a product from its image rows. */
-export function imageFor(images: ProductImage[] | undefined, fallback?: string | null): string {
-  if (images && images.length > 0) return images[0]!.url;
+/** Resolve a display image from image rows, a direct URL, or nothing. */
+export function imageFor(
+  source: ProductImage[] | string | null | undefined,
+  fallback?: string | null,
+): string {
+  if (typeof source === "string") return source || fallback || PLACEHOLDER;
+  if (source && source.length > 0) return source[0]!.url;
   return fallback || PLACEHOLDER;
 }
 
