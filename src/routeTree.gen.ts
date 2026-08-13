@@ -28,6 +28,7 @@ import { Route as AccountRewardsRouteImport } from './routes/account.rewards'
 import { Route as AccountSupportRouteImport } from './routes/account.support'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
+import { Route as AdminBrandsRouteImport } from './routes/admin.brands'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
@@ -137,6 +138,11 @@ const AdminBannersRoute = AdminBannersRouteImport.update({
   path: '/banners',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminBrandsRoute = AdminBrandsRouteImport.update({
+  id: '/brands',
+  path: '/brands',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCustomersRoute = AdminCustomersRouteImport.update({
   id: '/customers',
   path: '/customers',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/support': typeof AccountSupportRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -255,6 +262,7 @@ export interface FileRoutesByTo {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/support': typeof AccountSupportRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -290,6 +298,7 @@ export interface FileRoutesById {
   '/account/rewards': typeof AccountRewardsRoute
   '/account/support': typeof AccountSupportRoute
   '/admin/banners': typeof AdminBannersRoute
+  '/admin/brands': typeof AdminBrandsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
   '/admin/orders': typeof AdminOrdersRoute
@@ -326,6 +335,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/support'
     | '/admin/banners'
+    | '/admin/brands'
     | '/admin/customers'
     | '/admin/delivery'
     | '/admin/orders'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/support'
     | '/admin/banners'
+    | '/admin/brands'
     | '/admin/customers'
     | '/admin/delivery'
     | '/admin/orders'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/account/rewards'
     | '/account/support'
     | '/admin/banners'
+    | '/admin/brands'
     | '/admin/customers'
     | '/admin/delivery'
     | '/admin/orders'
@@ -567,6 +579,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBannersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/brands': {
+      id: '/admin/brands'
+      path: '/brands'
+      fullPath: '/admin/brands'
+      preLoaderRoute: typeof AdminBrandsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/customers': {
       id: '/admin/customers'
       path: '/customers'
@@ -682,6 +701,7 @@ const AccountRouteWithChildren =
 
 interface AdminRouteChildren {
   AdminBannersRoute: typeof AdminBannersRoute
+  AdminBrandsRoute: typeof AdminBrandsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminDeliveryRoute: typeof AdminDeliveryRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
@@ -692,6 +712,7 @@ interface AdminRouteChildren {
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminBannersRoute: AdminBannersRoute,
+  AdminBrandsRoute: AdminBrandsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminDeliveryRoute: AdminDeliveryRoute,
   AdminOrdersRoute: AdminOrdersRoute,
