@@ -33,6 +33,16 @@ export type Product = {
   created_at?: string;
 };
 
+export type ProductExtras = {
+  brand_id: string | null;
+  category_slug: string | null;
+  about: string | null;
+  weight_grams: number | null;
+  refund_policy: string | null;
+  return_days: number | null;
+  is_returnable: boolean | null;
+};
+
 export type Brand = {
   id: string;
   slug: string;
