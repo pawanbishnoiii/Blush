@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import { ProductCard } from "@/components/site/ProductCard";
 import { Reveal } from "@/components/site/Reveal";
+import { ScrollFx, type ScrollFxVariant } from "@/components/site/ScrollFx";
 import { Stars } from "@/components/site/Stars";
 import { Icon3D, Icon3DTile } from "@/components/site/Icon3D";
 import { bannersQuery, faqsQuery, productsQuery, reviewsQuery } from "@/lib/queries";
@@ -61,6 +62,7 @@ function Section({
   to,
   children,
   tinted = false,
+  fx = "fade-up",
 }: {
   eyebrow?: string;
   title: string;
@@ -68,11 +70,12 @@ function Section({
   to?: string;
   children: React.ReactNode;
   tinted?: boolean;
+  fx?: ScrollFxVariant;
 }) {
   return (
     <section className={cn(tinted && "bg-surface/70")}>
       <div className="mx-auto w-full max-w-[1400px] px-5 py-12 sm:px-8 sm:py-16">
-        <Reveal>
+        <ScrollFx variant="blur">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
             <div className="min-w-0">
               {eyebrow && <p className="eyebrow text-primary">{eyebrow}</p>}
@@ -90,8 +93,10 @@ function Section({
               </Link>
             )}
           </div>
-        </Reveal>
-        <div className="mt-7">{children}</div>
+        </ScrollFx>
+        <ScrollFx variant={fx} className="mt-7">
+          {children}
+        </ScrollFx>
       </div>
     </section>
   );
