@@ -25,6 +25,7 @@ import { Route as AccountAddressesRouteImport } from './routes/account.addresses
 import { Route as AccountCouponsRouteImport } from './routes/account.coupons'
 import { Route as AccountNotificationsRouteImport } from './routes/account.notifications'
 import { Route as AccountRewardsRouteImport } from './routes/account.rewards'
+import { Route as AccountSupportRouteImport } from './routes/account.support'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminBannersRouteImport } from './routes/admin.banners'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
@@ -121,6 +122,11 @@ const AccountRewardsRoute = AccountRewardsRouteImport.update({
   path: '/rewards',
   getParentRoute: () => AccountRoute,
 } as any)
+const AccountSupportRoute = AccountSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AccountRoute,
+} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/account/coupons': typeof AccountCouponsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/rewards': typeof AccountRewardsRoute
+  '/account/support': typeof AccountSupportRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/account/coupons': typeof AccountCouponsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/rewards': typeof AccountRewardsRoute
+  '/account/support': typeof AccountSupportRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
@@ -280,6 +288,7 @@ export interface FileRoutesById {
   '/account/coupons': typeof AccountCouponsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/rewards': typeof AccountRewardsRoute
+  '/account/support': typeof AccountSupportRoute
   '/admin/banners': typeof AdminBannersRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/delivery': typeof AdminDeliveryRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/account/coupons'
     | '/account/notifications'
     | '/account/rewards'
+    | '/account/support'
     | '/admin/banners'
     | '/admin/customers'
     | '/admin/delivery'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/account/coupons'
     | '/account/notifications'
     | '/account/rewards'
+    | '/account/support'
     | '/admin/banners'
     | '/admin/customers'
     | '/admin/delivery'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/account/coupons'
     | '/account/notifications'
     | '/account/rewards'
+    | '/account/support'
     | '/admin/banners'
     | '/admin/customers'
     | '/admin/delivery'
@@ -534,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountRewardsRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/account/support': {
+      id: '/account/support'
+      path: '/support'
+      fullPath: '/account/support'
+      preLoaderRoute: typeof AccountSupportRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/admin/': {
       id: '/admin/'
       path: '/'
@@ -647,6 +666,7 @@ interface AccountRouteChildren {
   AccountCouponsRoute: typeof AccountCouponsRoute
   AccountNotificationsRoute: typeof AccountNotificationsRoute
   AccountRewardsRoute: typeof AccountRewardsRoute
+  AccountSupportRoute: typeof AccountSupportRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
@@ -654,6 +674,7 @@ const AccountRouteChildren: AccountRouteChildren = {
   AccountCouponsRoute: AccountCouponsRoute,
   AccountNotificationsRoute: AccountNotificationsRoute,
   AccountRewardsRoute: AccountRewardsRoute,
+  AccountSupportRoute: AccountSupportRoute,
 }
 
 const AccountRouteWithChildren =
