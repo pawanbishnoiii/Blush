@@ -3,7 +3,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { MOODS, OCCASIONS, SORT_OPTIONS, type SortKey } from "@/lib/taxonomy";
+import { brandsQuery, categoriesQuery } from "@/lib/queries";
 import { inr } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 import type { PriceRange } from "@/hooks/useProductFilters";
@@ -13,6 +15,12 @@ type Filters = {
   setMood: (v: string) => void;
   occasion: string;
   setOccasion: (v: string) => void;
+  gender: string;
+  setGender: (v: string) => void;
+  brand: string;
+  setBrand: (v: string) => void;
+  category: string;
+  setCategory: (v: string) => void;
   price: PriceRange;
   setPrice: (v: PriceRange) => void;
   sort: SortKey;
@@ -116,8 +124,33 @@ export function SortSelect({ sort, setSort }: { sort: SortKey; setSort: (v: Sort
 }
 
 function FilterFields(props: Filters) {
+  const brands = useQuery(brandsQuery);
+  const categories = useQuery(categoriesQuery);
   return (
     <div className="space-y-6">
+      <Chips
+        label="Gender"
+        options={[
+          { key: "women", label: "Women" },
+          { key: "men", label: "Men" },
+          { key: "unisex", label: "Unisex" },
+          { key: "kids", label: "Kids" },
+        ]}
+        value={props.gender}
+        onChange={props.setGender}
+      />
+      <Chips
+        label="Category"
+        options={(categories.data ?? []).map((c) => ({ key: c.slug, label: c.name }))}
+        value={props.category}
+        onChange={props.setCategory}
+      />
+      <Chips
+        label="Brand"
+        options={(brands.data ?? []).map((b) => ({ key: b.id, label: b.name }))}
+        value={props.brand}
+        onChange={props.setBrand}
+      />
       <Chips label="Mood" options={MOODS.map((m) => ({ key: m.key, label: m.label }))} value={props.mood} onChange={props.setMood} />
       <Chips label="Occasion" options={OCCASIONS} value={props.occasion} onChange={props.setOccasion} />
       <PriceFilter price={props.price} setPrice={props.setPrice} bounds={props.bounds} />
