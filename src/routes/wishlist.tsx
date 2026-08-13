@@ -8,7 +8,7 @@ import { productsQuery } from "@/lib/queries";
 import { useWishlist } from "@/hooks/useWishlist";
 import { useCart } from "@/lib/cart-store";
 import { supabase } from "@/integrations/supabase/client";
-import type { Variant } from "@/lib/catalog";
+import type { Product, Variant } from "@/lib/catalog";
 
 export const Route = createFileRoute("/wishlist")({
   head: () => ({
@@ -64,7 +64,7 @@ function WishlistPage() {
   );
 }
 
-function WishlistCard({ product, index }: { product: ReturnType<typeof useQuery>["data"] extends never ? never : any; index: number }) {
+function WishlistCard({ product, index }: { product: Product; index: number }) {
   const wishlist = useWishlist();
   const navigate = useNavigate();
   const qc = useQueryClient();
