@@ -33,12 +33,15 @@ function AdminOrders() {
   const list = (orders.data ?? []).filter((o) => filter === "all" || String(o.status) === filter);
 
   async function setStatus(id: string, status: string, title: string, note?: string) {
-    const patch: Record<string, unknown> = { status };
-    if (status === "cancelled") {
-      patch['cancelled_at'] = new Date().toISOString();
-      patch['refund_status'] = "processing";
-      patch['cancel_reason'] = note ?? "Cancelled by store";
-    }
+    const patch =
+      status === "cancelled"
+        ? {
+            status,
+            cancelled_at: new Date().toISOString(),
+            refund_status: "processing",
+            cancel_reason: note ?? "Cancelled by store",
+          }
+        : { status };
     const { error } = await supabase.from("orders").update(patch).eq("id", id);
     if (error) return void toast.error(error.message);
     await supabase.from("tracking_events").insert({ order_id: id, status, title, note: note ?? null });
