@@ -488,6 +488,43 @@ function ProductPage() {
               <Spec label="Fit" value={product.fit ?? "—"} />
               <Spec label="Care" value={product.care ?? "—"} />
             </div>
+
+            {/* ABOUT + LOGISTICS */}
+            {product.about && (
+              <div className="mt-8 rounded-2xl border border-border bg-card p-5">
+                <p className="eyebrow text-muted-foreground">About this product</p>
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                  {product.about}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {brand && <Spec label="Brand" value={brand.name} />}
+              <Spec
+                label="Weight"
+                value={product.weight_grams ? `${product.weight_grams} g` : "—"}
+              />
+              <Spec
+                label="Returns"
+                value={
+                  product.is_returnable === false
+                    ? "Not returnable"
+                    : `${product.return_days ?? 15}-day return`
+                }
+              />
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-border bg-surface p-5">
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4 text-accent" />
+                <p className="text-sm font-bold">Refund policy</p>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {product.refund_policy ??
+                  "Full refund to your original payment method within 5–7 working days of pickup."}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -507,29 +544,61 @@ function ProductPage() {
         )}
 
         {/* REVIEWS */}
-        {reviews.length > 0 && (
-          <section className="mt-20">
-            <h2 className="section-type">Reviews for {product.name}</h2>
-            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {reviews.map((r, i) => (
-                <Reveal key={r.id} delay={(i % 3) * 0.05}>
-                  <figure className="flex h-full flex-col rounded-3xl border border-border bg-card p-6">
-                    <Stars rating={r.rating} />
-                    <p className="mt-3 text-base font-semibold">{r.title}</p>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                      {r.body}
-                    </p>
-                    <figcaption className="mt-4 text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground">{r.author}</span>
-                      {r.city && ` · ${r.city}`}
-                      {r.is_verified && <span className="text-success"> · Verified</span>}
-                    </figcaption>
-                  </figure>
-                </Reveal>
-              ))}
+        <section className="mt-20">
+          <h2 className="section-type">Ratings &amp; reviews</h2>
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+            <div className="min-w-0">
+              {reviews.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No reviews yet — be the first to share how it fits.
+                </p>
+              )}
+              <div className="grid gap-5 md:grid-cols-2">
+                {reviews.map((r, i) => (
+                  <Reveal key={r.id} delay={(i % 3) * 0.05}>
+                    <figure className="flex h-full flex-col rounded-3xl border border-border bg-card p-6">
+                      <Stars rating={r.rating} />
+                      <p className="mt-3 text-base font-semibold">{r.title}</p>
+                      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                        {r.body}
+                      </p>
+                      {(r.photos?.length ?? 0) > 0 && (
+                        <div className="mt-4 flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          {r.photos.map((url) => (
+                            <img
+                              key={url}
+                              src={url}
+                              alt={`Photo from ${r.author}`}
+                              loading="lazy"
+                              className="h-20 w-20 shrink-0 rounded-2xl object-cover"
+                            />
+                          ))}
+                        </div>
+                      )}
+                      <figcaption className="mt-4 text-xs text-muted-foreground">
+                        <span className="font-semibold text-foreground">{r.author}</span>
+                        {r.city && ` · ${r.city}`}
+                        {r.is_verified && <span className="text-success"> · Verified</span>}
+                        {r.variant_label && ` · ${r.variant_label}`}
+                      </figcaption>
+                    </figure>
+                  </Reveal>
+                ))}
+              </div>
             </div>
-          </section>
-        )}
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <ReviewForm
+                productId={product.id}
+                productSlug={product.slug}
+                variantLabel={
+                  effectiveVariant
+                    ? `${effectiveVariant.color_name} · ${effectiveVariant.size}`
+                    : null
+                }
+              />
+            </div>
+          </div>
+        </section>
 
         {/* SIMILAR */}
         {similar.length > 0 && (
