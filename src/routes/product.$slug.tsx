@@ -251,6 +251,7 @@ function ProductPage() {
 
   const saved = wishlist.isSaved(product.id);
   const discount = discountPct(product.price_inr, product.compare_at_inr);
+  const brand = (brands.data ?? []).find((b) => b.id === product.brand_id) ?? null;
 
   return (
     <div className="surface-warm pb-28 lg:pb-16">
