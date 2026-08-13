@@ -59,7 +59,7 @@ function CartPage() {
 
   return (
     <div className="surface-warm">
-      <div className="mx-auto w-full max-w-[1100px] px-5 py-12 sm:px-8 lg:py-16">
+      <div className="mx-auto w-full max-w-[1100px] px-5 pb-44 pt-12 sm:px-8 lg:pb-16 lg:pt-16">
         <h1 className="section-type">Your cart</h1>
 
         <div className="mt-9 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-12">
