@@ -33,6 +33,30 @@ export type Product = {
   created_at?: string;
 };
 
+export type Brand = {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string | null;
+  description: string | null;
+  logo_url: string | null;
+  is_active: boolean;
+  sort_order: number;
+};
+
+export type Category = {
+  id: string;
+  slug: string;
+  name: string;
+  parent_slug: string | null;
+  gender: string | null;
+  icon: string | null;
+  image_url: string | null;
+  description: string | null;
+  is_active: boolean;
+  sort_order: number;
+};
+
 export type Variant = {
   id: string;
   product_id: string;
