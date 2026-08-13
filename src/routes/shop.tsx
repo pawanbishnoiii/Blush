@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
+import { ProductFilterBar } from "@/components/site/ProductFilters";
+import { useProductFilters, type PriceRange } from "@/hooks/useProductFilters";
 import { productsQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
@@ -32,7 +34,16 @@ function Shop() {
 
   const all = products.data ?? [];
   const categories = ["All", ...Array.from(new Set(all.map((p) => p.category)))];
-  const visible = filter === "All" ? all : all.filter((p) => p.category === filter);
+  const byCategory = filter === "All" ? all : all.filter((p) => p.category === filter);
+
+  const bounds: PriceRange = useMemo(() => {
+    if (all.length === 0) return [0, 10000];
+    const prices = all.map((p) => p.price_inr);
+    return [Math.min(...prices), Math.max(...prices)];
+  }, [all]);
+
+  const filters = useProductFilters(byCategory, bounds);
+  const visible = filters.filtered;
 
   return (
     <div className="surface-warm">
@@ -46,22 +57,27 @@ function Shop() {
           like stays available.
         </p>
 
-        <div className="mt-9 flex flex-wrap gap-2">
-          {categories.map((c) => (
-            <button
-              key={c}
-              onClick={() => setFilter(c)}
-              className={cn(
-                "rounded-full border px-4 py-2 text-sm font-semibold transition-all",
-                filter === c
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-card hover:border-foreground/30",
-              )}
-            >
-              {c}
-            </button>
-          ))}
+        <div className="mt-9 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((c) => (
+              <button
+                key={c}
+                onClick={() => setFilter(c)}
+                className={cn(
+                  "rounded-full border px-4 py-2 text-sm font-semibold transition-all",
+                  filter === c
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card hover:border-foreground/30",
+                )}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          <ProductFilterBar {...filters} />
         </div>
+
+        <p className="mt-4 text-sm text-muted-foreground">{visible.length} products</p>
 
         {products.isLoading ? (
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

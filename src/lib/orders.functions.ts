@@ -22,6 +22,7 @@ export const placeOrderSchema = z.object({
   longitude: z.number().optional(),
   paymentMethod: z.enum(["cod", "upi", "card"]),
   items: z.array(itemSchema).min(1).max(20),
+  couponCode: z.string().trim().max(40).optional().or(z.literal("")),
 });
 
 export type PlaceOrderInput = z.infer<typeof placeOrderSchema>;
@@ -45,9 +46,24 @@ export const placeOrder = createServerFn({ method: "POST" })
       .select("id, product_id, color_name, size, stock, price_delta")
       .in("id", variantIds);
     if (vErr) throw new Error(vErr.message);
-    if (!variants || variants.length !== variantIds.length) throw new Error("Some items are no longer available");
 
-    const productIds = [...new Set(variants.map((v) => v.product_id))];
+    // Some products are sold as single-SKU items with no product_variants row.
+    // In that case the client sends the product id as the variant id (synthetic variant).
+    const foundIds = new Set((variants ?? []).map((v) => v.id));
+    const syntheticIds = variantIds.filter((id) => !foundIds.has(id));
+
+    const { data: syntheticProducts, error: synErr } = await supabaseAdmin
+      .from("products")
+      .select("id, name, price_inr, image_key")
+      .in("id", syntheticIds);
+    if (synErr) throw new Error(synErr.message);
+
+    const productIds = [
+      ...new Set([
+        ...(variants ?? []).map((v) => v.product_id),
+        ...(syntheticProducts ?? []).map((p) => p.id),
+      ]),
+    ];
     const { data: products, error: pErr } = await supabaseAdmin
       .from("products")
       .select("id, name, price_inr, image_key")
@@ -61,30 +77,80 @@ export const placeOrder = createServerFn({ method: "POST" })
       .single();
     if (sErr) throw new Error(sErr.message);
 
+    let couponRow: {
+      id: string;
+      kind: string;
+      value: number;
+      max_discount: number | null;
+      min_cart: number;
+      expires_at: string | null;
+      is_active: boolean;
+      used_count: number;
+      usage_limit: number | null;
+    } | null = null;
+    if (data.couponCode) {
+      const { data: coupon, error: cErr } = await supabaseAdmin
+        .from("coupons")
+        .select("id, kind, value, max_discount, min_cart, expires_at, is_active, used_count, usage_limit")
+        .ilike("code", data.couponCode)
+        .maybeSingle();
+      if (cErr) throw new Error(cErr.message);
+      if (!coupon) throw new Error("That coupon code isn't valid");
+      couponRow = coupon;
+    }
+
     let subtotal = 0;
     const lines = data.items.map((item) => {
-      const variant = variants.find((v) => v.id === item.variantId)!;
-      const product = products?.find((p) => p.id === variant.product_id);
+      const variant = (variants ?? []).find((v) => v.id === item.variantId);
+      const syntheticProduct = (syntheticProducts ?? []).find((p) => p.id === item.variantId);
+      if (!variant && !syntheticProduct) throw new Error("Some items are no longer available");
+
+      const product = (products ?? []).find((p) =>
+        variant ? p.id === variant.product_id : p.id === syntheticProduct!.id,
+      );
       if (!product) throw new Error("Product unavailable");
-      if (variant.stock < item.quantity) {
-        throw new Error(`${product.name} (${variant.color_name} / ${variant.size}) is out of stock`);
+
+      if (variant) {
+        if (variant.stock < item.quantity) {
+          throw new Error(`${product.name} (${variant.color_name} / ${variant.size}) is out of stock`);
+        }
       }
-      const unitPrice = product.price_inr + variant.price_delta;
+
+      const unitPrice = product.price_inr + (variant?.price_delta ?? 0);
       subtotal += unitPrice * item.quantity;
       return {
         product_id: product.id,
-        variant_id: variant.id,
+        variant_id: variant ? variant.id : product.id,
         name: product.name,
-        variant_label: `${variant.color_name} · ${variant.size}`,
+        variant_label: variant
+          ? `${variant.color_name} · ${variant.size}`
+          : "Default · One Size",
         image_key: product.image_key,
         unit_price: unitPrice,
         quantity: item.quantity,
-        newStock: variant.stock - item.quantity,
+        newStock: variant ? variant.stock - item.quantity : null,
+        variantIdForUpdate: variant ? variant.id : null,
       };
     });
 
+    let discount = 0;
+    if (couponRow) {
+      if (!couponRow.is_active) throw new Error("This coupon is no longer active");
+      if (couponRow.expires_at && new Date(couponRow.expires_at).getTime() < Date.now()) {
+        throw new Error("This coupon has expired");
+      }
+      if (subtotal < couponRow.min_cart) {
+        throw new Error(`This coupon needs a minimum cart of ${couponRow.min_cart}`);
+      }
+      if (couponRow.usage_limit != null && couponRow.used_count >= couponRow.usage_limit) {
+        throw new Error("This coupon has been fully redeemed");
+      }
+      const raw = couponRow.kind === "percent" ? Math.round((subtotal * couponRow.value) / 100) : couponRow.value;
+      discount = Math.max(0, Math.min(couponRow.max_discount ? Math.min(raw, couponRow.max_discount) : raw, subtotal));
+    }
+
     const shipping = subtotal >= settings.free_delivery_threshold ? 0 : settings.shipping_fee;
-    const total = subtotal + shipping;
+    const total = Math.max(0, subtotal - discount + shipping);
 
     const eta = new Date();
     eta.setDate(eta.getDate() + 4);
@@ -130,6 +196,13 @@ export const placeOrder = createServerFn({ method: "POST" })
     );
     if (iErr) throw new Error(iErr.message);
 
+    if (couponRow) {
+      await supabaseAdmin
+        .from("coupons")
+        .update({ used_count: couponRow.used_count + 1 })
+        .eq("id", couponRow.id);
+    }
+
     await supabaseAdmin.from("tracking_events").insert([
       {
         order_id: order.id,
@@ -154,7 +227,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       ),
     );
 
-    return { orderCode: order.order_code, total, shipping, subtotal };
+    return { orderCode: order.order_code, total, shipping, subtotal, discount };
   });
 
 export const getOrder = createServerFn({ method: "GET" })

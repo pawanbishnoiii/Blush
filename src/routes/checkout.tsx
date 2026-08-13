@@ -6,21 +6,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Loader2, MapPin, Lock, Banknote, Smartphone, CreditCard } from "lucide-react";
+import { Loader2, MapPin, Lock, Banknote, Smartphone, CreditCard, Tag, X } from "lucide-react";
 import { toast } from "sonner";
 import { cartSubtotal, useCart } from "@/lib/cart-store";
-import { settingsQuery } from "@/lib/queries";
-import { deliveryEstimate, imageFor, inr } from "@/lib/catalog";
+import { myAddressesQuery, productImagesQuery, settingsQuery } from "@/lib/queries";
+import { couponDiscount, couponError as couponErrorFor, deliveryEstimate, inr, type Coupon } from "@/lib/catalog";
+import { resolveLineImage } from "@/lib/image";
 import { placeOrder } from "@/lib/orders.functions";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Esko" },
+      { title: "Checkout — Blush" },
       { name: "description", content: "Secure one-page checkout with UPI, cards and cash on delivery." },
-      { property: "og:title", content: "Checkout — Esko" },
-      { property: "og:description", content: "Secure one-page Esko checkout." },
+      { property: "og:title", content: "Checkout — Blush" },
+      { property: "og:description", content: "Secure one-page Blush checkout." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -42,14 +45,35 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+type SavedAddress = {
+  id: string;
+  label: string;
+  full_name: string;
+  phone: string;
+  address_line1: string;
+  address_line2: string | null;
+  city: string;
+  state: string;
+  pincode: string;
+  is_default: boolean;
+};
+
 function Checkout() {
   const navigate = useNavigate();
   const { lines, clear } = useCart();
+  const { user } = useAuth();
   const settings = useQuery(settingsQuery);
+  const productImages = useQuery(productImagesQuery);
+  const addresses = useQuery({ ...myAddressesQuery, enabled: Boolean(user) });
   const submitOrder = useServerFn(placeOrder);
   const [locating, setLocating] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [couponMessage, setCouponMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   const {
     register,
@@ -67,7 +91,56 @@ function Checkout() {
   const threshold = settings.data?.free_delivery_threshold ?? 1499;
   const fee = settings.data?.shipping_fee ?? 79;
   const shipping = subtotal >= threshold ? 0 : fee;
-  const total = subtotal + shipping;
+  const discount = appliedCoupon ? couponDiscount(appliedCoupon, subtotal) : 0;
+  const total = Math.max(0, subtotal - discount + shipping);
+
+  function applyAddress(addr: SavedAddress) {
+    setValue("fullName", addr.full_name, { shouldValidate: true });
+    setValue("phone", addr.phone, { shouldValidate: true });
+    setValue("addressLine1", addr.address_line1, { shouldValidate: true });
+    setValue("addressLine2", addr.address_line2 ?? "", { shouldValidate: true });
+    setValue("city", addr.city, { shouldValidate: true });
+    setValue("state", addr.state, { shouldValidate: true });
+    setValue("pincode", addr.pincode, { shouldValidate: true });
+  }
+
+  async function applyCoupon() {
+    const code = couponInput.trim();
+    if (!code) return;
+    setApplyingCoupon(true);
+    setCouponMessage(null);
+    try {
+      const { data, error } = await supabase
+        .from("coupons")
+        .select("*")
+        .ilike("code", code)
+        .maybeSingle();
+      if (error) throw error;
+      const coupon = (data as Coupon | null) ?? null;
+      const err = couponErrorFor(coupon, subtotal);
+      if (err) {
+        setAppliedCoupon(null);
+        setCouponMessage({ type: "error", text: err });
+        return;
+      }
+      setAppliedCoupon(coupon);
+      setCouponMessage({ type: "success", text: `${coupon!.code.toUpperCase()} applied` });
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Couldn't apply that coupon",
+      });
+    } finally {
+      setApplyingCoupon(false);
+    }
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponMessage(null);
+  }
 
   async function detectLocation() {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -124,6 +197,7 @@ function Checkout() {
           addressLine2: values.addressLine2 ?? "",
           ...(coords ? { latitude: coords.lat, longitude: coords.lon } : {}),
           items: lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity })),
+          ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
         },
       });
       clear();
@@ -194,6 +268,29 @@ function Checkout() {
             </Section>
 
             <Section step="02" title="Delivery address">
+              {user && (addresses.data?.length ?? 0) > 0 && (
+                <label className="mb-4 block">
+                  <span className="text-xs font-medium text-muted-foreground">Use a saved address</span>
+                  <select
+                    className="input-base mt-1.5 h-12 w-full rounded-xl border border-border bg-background px-4 text-sm outline-none transition-colors focus:border-accent"
+                    value={selectedAddressId}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setSelectedAddressId(id);
+                      const addr = (addresses.data as SavedAddress[] | undefined)?.find((a) => a.id === id);
+                      if (addr) applyAddress(addr);
+                    }}
+                  >
+                    <option value="">Enter a new address</option>
+                    {(addresses.data as SavedAddress[] | undefined)?.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {a.label || "Address"} — {a.address_line1}, {a.city}
+                        {a.is_default ? " (default)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <button
                 type="button"
                 onClick={detectLocation}

@@ -27,12 +27,12 @@ export const Route = createFileRoute("/account")({
 const SHORTCUTS = [
   { icon: "my-orders", label: "My Orders", to: "/orders" },
   { icon: "wishlist", label: "Wishlist", to: "/wishlist" },
-  { icon: "coupons", label: "Coupons", to: "/offers" },
-  { icon: "addresses", label: "Addresses", to: "/account" },
+  { icon: "coupons", label: "Coupons", to: "/account/coupons" },
+  { icon: "addresses", label: "Addresses", to: "/account/addresses" },
   { icon: "payment-methods", label: "Payments", to: "/account" },
-  { icon: "notifications", label: "Alerts", to: "/account" },
-  { icon: "rewards", label: "Rewards", to: "/account" },
-  { icon: "support", label: "Support", to: "/policies" },
+  { icon: "notifications", label: "Alerts", to: "/account/notifications" },
+  { icon: "rewards", label: "Rewards", to: "/account/rewards" },
+  { icon: "support", label: "Support", to: "/account/support" },
 ] as const;
 
 function AccountPage() {
