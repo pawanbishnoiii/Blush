@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, ArrowRight, ShoppingBag, Heart, ShieldCheck, RotateCcw, Truck } from "lucide-react";
 import { cartSavings, cartSubtotal, useCart } from "@/lib/cart-store";
 import { settingsQuery } from "@/lib/queries";
 import { deliveryEstimate, imageFor, inr } from "@/lib/catalog";
+import { useWishlist } from "@/hooks/useWishlist";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -23,6 +25,7 @@ export const Route = createFileRoute("/cart")({
 function CartPage() {
   const { lines, setQty, remove } = useCart();
   const settings = useQuery(settingsQuery);
+  const wishlist = useWishlist();
 
   const subtotal = cartSubtotal(lines);
   const savings = cartSavings(lines);
@@ -56,7 +59,7 @@ function CartPage() {
 
   return (
     <div className="surface-warm">
-      <div className="mx-auto w-full max-w-[1100px] px-5 py-12 sm:px-8 lg:py-16">
+      <div className="mx-auto w-full max-w-[1100px] px-5 pb-44 pt-12 sm:px-8 lg:pb-16 lg:pt-16">
         <h1 className="section-type">Your cart</h1>
 
         <div className="mt-9 grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-12">
@@ -144,6 +147,16 @@ function CartPage() {
                         >
                           <Trash2 className="h-3.5 w-3.5" /> Remove
                         </button>
+                        <button
+                          onClick={() => {
+                            wishlist.toggle(l.productId);
+                            remove(l.variantId);
+                            toast.success("Moved to wishlist");
+                          }}
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+                        >
+                          <Heart className="h-3.5 w-3.5" /> Save for later
+                        </button>
                       </div>
                     </div>
                   </motion.li>
@@ -183,8 +196,38 @@ function CartPage() {
               >
                 Continue shopping
               </Link>
+
+              <div className="mt-6 grid gap-3 border-t border-border pt-5 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-accent" /> 100% secure payments · UPI, cards, COD
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <RotateCcw className="h-4 w-4 text-accent" /> 15-day easy returns with free pickup
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-accent" /> Dispatched in 24 hours
+                </span>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* MOBILE STICKY BAR */}
+      <div className="fixed inset-x-0 bottom-16 z-40 border-t border-border glass-bar px-5 py-3 lg:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="num-strong text-lg">{inr(subtotal + shipping)}</p>
+            <p className="truncate text-[11px] text-muted-foreground">
+              {lines.length} item{lines.length > 1 ? "s" : ""} · {shipping === 0 ? "Free delivery" : inr(shipping) + " delivery"}
+            </p>
+          </div>
+          <Link
+            to="/checkout"
+            className="inline-flex h-12 shrink-0 items-center gap-2 rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground"
+          >
+            Checkout <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </div>

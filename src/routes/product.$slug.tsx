@@ -15,7 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
-import { productDetailQuery, productsQuery } from "@/lib/queries";
+import { brandsQuery, productDetailQuery, productsQuery } from "@/lib/queries";
 import { deliveryEstimate, discountPct, imageFor, inr, type Product } from "@/lib/catalog";
 import { useCart } from "@/lib/cart-store";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -23,6 +23,8 @@ import { Stars } from "@/components/site/Stars";
 import { ProductCard } from "@/components/site/ProductCard";
 import { ProductGallery } from "@/components/site/ProductGallery";
 import { Reveal } from "@/components/site/Reveal";
+import { ScrollFx } from "@/components/site/ScrollFx";
+import { ReviewForm } from "@/components/site/ReviewForm";
 import { Icon3D } from "@/components/site/Icon3D";
 import { cn } from "@/lib/utils";
 import {
@@ -64,6 +66,7 @@ function ProductPage() {
   const navigate = useNavigate();
   const detail = useQuery(productDetailQuery(slug));
   const allProducts = useQuery(productsQuery);
+  const brands = useQuery(brandsQuery);
   const add = useCart((s) => s.add);
   const wishlist = useWishlist();
 
@@ -248,6 +251,7 @@ function ProductPage() {
 
   const saved = wishlist.isSaved(product.id);
   const discount = discountPct(product.price_inr, product.compare_at_inr);
+  const brand = (brands.data ?? []).find((b) => b.id === product.brand_id) ?? null;
 
   return (
     <div className="surface-warm pb-28 lg:pb-16">
@@ -292,6 +296,11 @@ function ProductPage() {
               {product.name}
             </h1>
             <p className="mt-3 text-base text-muted-foreground">{product.tagline}</p>
+            {brand && (
+              <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                By {brand.name}
+              </p>
+            )}
 
             <div className="mt-4 flex items-center gap-3">
               <Stars rating={product.rating} />
@@ -479,6 +488,43 @@ function ProductPage() {
               <Spec label="Fit" value={product.fit ?? "—"} />
               <Spec label="Care" value={product.care ?? "—"} />
             </div>
+
+            {/* ABOUT + LOGISTICS */}
+            {product.about && (
+              <div className="mt-8 rounded-2xl border border-border bg-card p-5">
+                <p className="eyebrow text-muted-foreground">About this product</p>
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                  {product.about}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {brand && <Spec label="Brand" value={brand.name} />}
+              <Spec
+                label="Weight"
+                value={product.weight_grams ? `${product.weight_grams} g` : "—"}
+              />
+              <Spec
+                label="Returns"
+                value={
+                  product.is_returnable === false
+                    ? "Not returnable"
+                    : `${product.return_days ?? 15}-day return`
+                }
+              />
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-border bg-surface p-5">
+              <div className="flex items-center gap-2">
+                <RotateCcw className="h-4 w-4 text-accent" />
+                <p className="text-sm font-bold">Refund policy</p>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {product.refund_policy ??
+                  "Full refund to your original payment method within 5–7 working days of pickup."}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -489,48 +535,84 @@ function ProductPage() {
               <Icon3D name="collections" size="md" />
               <h2 className="section-type">Complete the look</h2>
             </div>
-            <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-              {completeLook.map((p, i) => (
-                <ProductCard key={p.id} product={p} index={i} />
-              ))}
-            </div>
+            <ScrollFx variant="stagger-scale">
+              <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                {completeLook.map((p, i) => (
+                  <ProductCard key={p.id} product={p} index={i} />
+                ))}
+              </div>
+            </ScrollFx>
           </section>
         )}
 
         {/* REVIEWS */}
-        {reviews.length > 0 && (
-          <section className="mt-20">
-            <h2 className="section-type">Reviews for {product.name}</h2>
-            <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-              {reviews.map((r, i) => (
-                <Reveal key={r.id} delay={(i % 3) * 0.05}>
-                  <figure className="flex h-full flex-col rounded-3xl border border-border bg-card p-6">
-                    <Stars rating={r.rating} />
-                    <p className="mt-3 text-base font-semibold">{r.title}</p>
-                    <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                      {r.body}
-                    </p>
-                    <figcaption className="mt-4 text-xs text-muted-foreground">
-                      <span className="font-semibold text-foreground">{r.author}</span>
-                      {r.city && ` · ${r.city}`}
-                      {r.is_verified && <span className="text-success"> · Verified</span>}
-                    </figcaption>
-                  </figure>
-                </Reveal>
-              ))}
+        <section className="mt-20">
+          <h2 className="section-type">Ratings &amp; reviews</h2>
+          <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+            <div className="min-w-0">
+              {reviews.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No reviews yet — be the first to share how it fits.
+                </p>
+              )}
+              <div className="grid gap-5 md:grid-cols-2">
+                {reviews.map((r, i) => (
+                  <Reveal key={r.id} delay={(i % 3) * 0.05}>
+                    <figure className="flex h-full flex-col rounded-3xl border border-border bg-card p-6">
+                      <Stars rating={r.rating} />
+                      <p className="mt-3 text-base font-semibold">{r.title}</p>
+                      <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+                        {r.body}
+                      </p>
+                      {(r.photos?.length ?? 0) > 0 && (
+                        <div className="mt-4 flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                          {r.photos.map((url) => (
+                            <img
+                              key={url}
+                              src={url}
+                              alt={`Photo from ${r.author}`}
+                              loading="lazy"
+                              className="h-20 w-20 shrink-0 rounded-2xl object-cover"
+                            />
+                          ))}
+                        </div>
+                      )}
+                      <figcaption className="mt-4 text-xs text-muted-foreground">
+                        <span className="font-semibold text-foreground">{r.author}</span>
+                        {r.city && ` · ${r.city}`}
+                        {r.is_verified && <span className="text-success"> · Verified</span>}
+                        {r.variant_label && ` · ${r.variant_label}`}
+                      </figcaption>
+                    </figure>
+                  </Reveal>
+                ))}
+              </div>
             </div>
-          </section>
-        )}
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <ReviewForm
+                productId={product.id}
+                productSlug={product.slug}
+                variantLabel={
+                  effectiveVariant
+                    ? `${effectiveVariant.color_name} · ${effectiveVariant.size}`
+                    : null
+                }
+              />
+            </div>
+          </div>
+        </section>
 
         {/* SIMILAR */}
         {similar.length > 0 && (
           <section className="mt-20">
             <h2 className="section-type">You may also like</h2>
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {similar.map((p, i) => (
-                <ProductCard key={p.id} product={p} index={i} />
-              ))}
-            </div>
+            <ScrollFx variant="stagger">
+              <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {similar.map((p, i) => (
+                  <ProductCard key={p.id} product={p} index={i} />
+                ))}
+              </div>
+            </ScrollFx>
           </section>
         )}
       </div>

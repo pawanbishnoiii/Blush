@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const itemSchema = z.object({
@@ -39,6 +41,19 @@ export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => placeOrderSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Link the order to the signed-in shopper when a bearer token is present.
+    let userId: string | null = null;
+    try {
+      const auth = getRequest()?.headers.get("authorization") ?? "";
+      const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+      if (token && token.split(".").length === 3) {
+        const { data: u } = await supabaseAdmin.auth.getUser(token);
+        userId = u.user?.id ?? null;
+      }
+    } catch {
+      userId = null;
+    }
 
     const variantIds = data.items.map((i) => i.variantId);
     const { data: variants, error: vErr } = await supabaseAdmin
@@ -159,6 +174,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       .from("orders")
       .insert({
         order_code: makeOrderCode(),
+        user_id: userId,
         full_name: data.fullName,
         email: data.email,
         phone: data.phone,
@@ -266,4 +282,81 @@ export const getOrder = createServerFn({ method: "GET" })
 
     const { id: _id, ...safeOrder } = order;
     return { order: safeOrder, items: items ?? [], events: events ?? [] };
+  });
+
+export const cancelOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        orderId: z.string().uuid(),
+        reason: z.string().trim().min(3).max(240),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .select("id, user_id, status, payment_method")
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!order || order.user_id !== context.userId) throw new Error("Order not found");
+
+    const cancellable = ["placed", "confirmed", "processing", "packed"];
+    if (!cancellable.includes(order.status)) {
+      throw new Error("This order has already shipped — request a return instead.");
+    }
+
+    const refundStatus = order.payment_method === "cod" ? "not_applicable" : "initiated";
+
+    const { error: uErr } = await supabaseAdmin
+      .from("orders")
+      .update({
+        status: "cancelled",
+        cancelled_at: new Date().toISOString(),
+        cancel_reason: data.reason,
+        refund_status: refundStatus,
+      })
+      .eq("id", order.id);
+    if (uErr) throw new Error(uErr.message);
+
+    // Return the reserved stock to the shelf.
+    const { data: items } = await supabaseAdmin
+      .from("order_items")
+      .select("variant_id, quantity")
+      .eq("order_id", order.id);
+
+    const variantIds = (items ?? []).map((i) => i.variant_id).filter(Boolean) as string[];
+    if (variantIds.length) {
+      const { data: variants } = await supabaseAdmin
+        .from("product_variants")
+        .select("id, stock")
+        .in("id", variantIds);
+      await Promise.all(
+        (variants ?? []).map((v) => {
+          const qty = (items ?? [])
+            .filter((i) => i.variant_id === v.id)
+            .reduce((s, i) => s + i.quantity, 0);
+          return supabaseAdmin
+            .from("product_variants")
+            .update({ stock: v.stock + qty })
+            .eq("id", v.id);
+        }),
+      );
+    }
+
+    await supabaseAdmin.from("tracking_events").insert({
+      order_id: order.id,
+      status: "cancelled",
+      title: "Order cancelled",
+      note:
+        refundStatus === "initiated"
+          ? `Cancelled by you — ${data.reason}. Refund initiated, 5–7 working days.`
+          : `Cancelled by you — ${data.reason}.`,
+    });
+
+    return { ok: true, refundStatus };
   });

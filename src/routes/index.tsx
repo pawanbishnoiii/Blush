@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import { ProductCard } from "@/components/site/ProductCard";
 import { Reveal } from "@/components/site/Reveal";
+import { ScrollFx, type ScrollFxVariant } from "@/components/site/ScrollFx";
 import { Stars } from "@/components/site/Stars";
 import { Icon3D, Icon3DTile } from "@/components/site/Icon3D";
 import { bannersQuery, faqsQuery, productsQuery, reviewsQuery } from "@/lib/queries";
@@ -61,6 +62,7 @@ function Section({
   to,
   children,
   tinted = false,
+  fx = "fade-up",
 }: {
   eyebrow?: string;
   title: string;
@@ -68,11 +70,12 @@ function Section({
   to?: string;
   children: React.ReactNode;
   tinted?: boolean;
+  fx?: ScrollFxVariant;
 }) {
   return (
     <section className={cn(tinted && "bg-surface/70")}>
       <div className="mx-auto w-full max-w-[1400px] px-5 py-12 sm:px-8 sm:py-16">
-        <Reveal>
+        <ScrollFx variant="blur">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
             <div className="min-w-0">
               {eyebrow && <p className="eyebrow text-primary">{eyebrow}</p>}
@@ -90,8 +93,10 @@ function Section({
               </Link>
             )}
           </div>
-        </Reveal>
-        <div className="mt-7">{children}</div>
+        </ScrollFx>
+        <ScrollFx variant={fx} className="mt-7">
+          {children}
+        </ScrollFx>
       </div>
     </section>
   );
@@ -223,13 +228,15 @@ function Home() {
             className="relative"
           >
             <div className="overflow-hidden rounded-[2rem] shadow-lift">
-              <img
-                src={banner?.image_url ?? heroImage}
-                alt={banner?.title ?? "Shop your vibe — fashion, beauty and accessories"}
-                width={1536}
-                height={1024}
-                className="w-full object-cover"
-              />
+              <ScrollFx variant="parallax" distance={26}>
+                <img
+                  src={banner?.image_url ?? heroImage}
+                  alt={banner?.title ?? "Shop your vibe — fashion, beauty and accessories"}
+                  width={1536}
+                  height={1024}
+                  className="w-full scale-110 object-cover"
+                />
+              </ScrollFx>
             </div>
             <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-2xl bg-card/95 px-3 py-2 shadow-lift backdrop-blur">
               <Icon3D name="fast-delivery" size="sm" />
@@ -258,7 +265,7 @@ function Home() {
       </section>
 
       {/* NEW ARRIVALS */}
-      <Section eyebrow="Fresh in" title="New arrivals" sub="Straight off this week's drop" to="/shop">
+      <Section eyebrow="Fresh in" title="New arrivals" sub="Straight off this week's drop" to="/shop" fx="stagger-scale">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {newArrivals.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
@@ -267,7 +274,7 @@ function Home() {
       </Section>
 
       {/* TRENDING */}
-      <Section eyebrow="Everyone's buying" title="Trending now" tinted to="/shop">
+      <Section eyebrow="Everyone's buying" title="Trending now" tinted to="/shop" fx="slide-left">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {trending.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
@@ -276,7 +283,7 @@ function Home() {
       </Section>
 
       {/* CATEGORIES */}
-      <Section eyebrow="Browse" title="Shop by category" sub="Fashion, beauty and everything cute">
+      <Section eyebrow="Browse" title="Shop by category" sub="Fashion, beauty and everything cute" fx="pop">
         <div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
           {FASHION.map((f) => (
             <Link key={f.icon} to="/category/$slug" params={{ slug: f.icon }}>
@@ -299,6 +306,7 @@ function Home() {
         title={activeMood.headline}
         sub={`Picked for your ${activeMood.label.toLowerCase()} mood`}
         tinted
+        fx="reveal-mask"
       >
         <Rail>
           {VIBES.map((v) => (
@@ -323,7 +331,7 @@ function Home() {
       </Section>
 
       {/* OCCASIONS */}
-      <Section eyebrow="Dress for it" title="Occasion edit">
+      <Section eyebrow="Dress for it" title="Occasion edit" fx="flip">
         <div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
           {OCCASIONS.map((o) => (
             <Link key={o.key} to="/category/$slug" params={{ slug: o.key }}>
@@ -334,7 +342,7 @@ function Home() {
       </Section>
 
       {/* PRICE EDITS */}
-      <Section eyebrow="Budget picks" title="Steals under ₹999" tinted>
+      <Section eyebrow="Budget picks" title="Steals under ₹999" tinted fx="stagger">
         <div className="grid gap-4 sm:grid-cols-3">
           {PRICE_EDITS.map((edit) => {
             const items = all.filter((p) => p.price_inr <= edit.max).slice(0, 3);
@@ -370,7 +378,7 @@ function Home() {
       </Section>
 
       {/* FOR YOU */}
-      <Section eyebrow="For you" title="Highest rated right now" to="/shop">
+      <Section eyebrow="For you" title="Highest rated right now" to="/shop" fx="zoom">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {forYou.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
@@ -379,7 +387,7 @@ function Home() {
       </Section>
 
       {/* SPECIAL */}
-      <Section eyebrow="More to explore" title="Collections & extras" tinted>
+      <Section eyebrow="More to explore" title="Collections & extras" tinted fx="slide-right">
         <Rail>
           {SPECIAL.map((s) => (
             <Link key={s.icon} to="/shop" className="w-[104px] shrink-0 snap-start sm:w-[128px]">
@@ -391,6 +399,7 @@ function Home() {
 
       {/* TRUST */}
       <section className="mx-auto w-full max-w-[1400px] px-5 py-10 sm:px-8">
+        <ScrollFx variant="stagger">
         <div className="grid grid-cols-2 gap-4 rounded-3xl border border-border bg-card p-5 shadow-soft sm:grid-cols-4">
           {TRUST.map((t) => (
             <div key={t.icon} className="flex min-w-0 items-center gap-3">
@@ -402,11 +411,12 @@ function Home() {
             </div>
           ))}
         </div>
+        </ScrollFx>
       </section>
 
       {/* REVIEWS */}
       {(reviews.data?.length ?? 0) > 0 && (
-        <Section eyebrow="Customer love" title="Real reviews from verified buyers" tinted>
+        <Section eyebrow="Customer love" title="Real reviews from verified buyers" tinted fx="stagger">
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {(reviews.data ?? []).slice(0, 6).map((r, i: number) => (
               <Reveal key={r.id} delay={(i % 3) * 0.06}>
@@ -430,7 +440,7 @@ function Home() {
 
       {/* FAQ */}
       {(faqs.data?.length ?? 0) > 0 && (
-        <Section eyebrow="Good to know" title="Frequently asked">
+        <Section eyebrow="Good to know" title="Frequently asked" fx="reveal-mask">
           <Accordion type="single" collapsible className="mx-auto max-w-3xl">
             {(faqs.data ?? []).slice(0, 8).map((f: { id: string; question: string; answer: string }) => (
               <AccordionItem key={f.id} value={f.id}>

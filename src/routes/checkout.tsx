@@ -235,6 +235,18 @@ function Checkout() {
           One page. No account needed — we&apos;ll email your tracking link.
         </p>
 
+        <div className="mt-6 grid gap-3 rounded-3xl border border-border bg-card p-4 text-xs font-semibold sm:grid-cols-3">
+          <span className="inline-flex items-center gap-2">
+            <Lock className="h-4 w-4 text-accent" /> 256-bit secure checkout
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Banknote className="h-4 w-4 text-accent" /> Cash on delivery available
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Tag className="h-4 w-4 text-accent" /> Coupons stack with sale prices
+          </span>
+        </div>
+
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="mt-9 grid gap-8 lg:grid-cols-[1.35fr_1fr] lg:gap-12"
