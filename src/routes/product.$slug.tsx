@@ -15,7 +15,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
-import { productDetailQuery, productsQuery } from "@/lib/queries";
+import { brandsQuery, productDetailQuery, productsQuery } from "@/lib/queries";
 import { deliveryEstimate, discountPct, imageFor, inr, type Product } from "@/lib/catalog";
 import { useCart } from "@/lib/cart-store";
 import { useWishlist } from "@/hooks/useWishlist";
@@ -23,6 +23,8 @@ import { Stars } from "@/components/site/Stars";
 import { ProductCard } from "@/components/site/ProductCard";
 import { ProductGallery } from "@/components/site/ProductGallery";
 import { Reveal } from "@/components/site/Reveal";
+import { ScrollFx } from "@/components/site/ScrollFx";
+import { ReviewForm } from "@/components/site/ReviewForm";
 import { Icon3D } from "@/components/site/Icon3D";
 import { cn } from "@/lib/utils";
 import {
@@ -64,6 +66,7 @@ function ProductPage() {
   const navigate = useNavigate();
   const detail = useQuery(productDetailQuery(slug));
   const allProducts = useQuery(productsQuery);
+  const brands = useQuery(brandsQuery);
   const add = useCart((s) => s.add);
   const wishlist = useWishlist();
 
@@ -292,6 +295,11 @@ function ProductPage() {
               {product.name}
             </h1>
             <p className="mt-3 text-base text-muted-foreground">{product.tagline}</p>
+            {brand && (
+              <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-primary">
+                By {brand.name}
+              </p>
+            )}
 
             <div className="mt-4 flex items-center gap-3">
               <Stars rating={product.rating} />
