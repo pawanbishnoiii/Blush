@@ -32,12 +32,25 @@ function AdminOrders() {
 
   const list = (orders.data ?? []).filter((o) => filter === "all" || String(o.status) === filter);
 
-  async function setStatus(id: string, status: string, title: string) {
-    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+  async function setStatus(id: string, status: string, title: string, note?: string) {
+    const patch: Record<string, unknown> = { status };
+    if (status === "cancelled") {
+      patch['cancelled_at'] = new Date().toISOString();
+      patch['refund_status'] = "processing";
+      patch['cancel_reason'] = note ?? "Cancelled by store";
+    }
+    const { error } = await supabase.from("orders").update(patch).eq("id", id);
     if (error) return void toast.error(error.message);
-    await supabase.from("tracking_events").insert({ order_id: id, status, title });
-    await qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+    await supabase.from("tracking_events").insert({ order_id: id, status, title, note: note ?? null });
+    await qc.invalidateQueries({ queryKey: ["admin_orders"] });
     toast.success(`Marked ${title.toLowerCase()}`);
+  }
+
+  async function setRefund(id: string, refund_status: string) {
+    const { error } = await supabase.from("orders").update({ refund_status }).eq("id", id);
+    if (error) return void toast.error(error.message);
+    await qc.invalidateQueries({ queryKey: ["admin_orders"] });
+    toast.success(`Refund ${refund_status}`);
   }
 
   async function saveShipping(id: string, courier: string, tracking: string, eta: string) {
@@ -50,7 +63,7 @@ function AdminOrders() {
       })
       .eq("id", id);
     if (error) return void toast.error(error.message);
-    await qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+    await qc.invalidateQueries({ queryKey: ["admin_orders"] });
     toast.success("Shipment details saved");
   }
 
