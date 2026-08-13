@@ -135,9 +135,32 @@ export function productDetailQuery(slug: string) {
           .order("helpful_count", { ascending: false }),
       ]);
 
+      const productTyped = product as unknown as Product;
+      let variantRows = (variants ?? []) as unknown as Variant[];
+
+      // Fallback for products that don't have variants yet: create a synthetic
+      // single-SKU variant so the purchase flow still works.
+      if (variantRows.length === 0) {
+        variantRows = [
+          {
+            id: productTyped.id,
+            product_id: productTyped.id,
+            color_name: "Default",
+            color_hex: "#e5e7eb",
+            size: "One Size",
+            sku: productTyped.slug.toUpperCase(),
+            stock: 50,
+            price_delta: 0,
+            sort_order: 0,
+            image_key: null,
+            swatch_url: null,
+          } satisfies Variant,
+        ];
+      }
+
       return {
-        product: product as unknown as Product,
-        variants: (variants ?? []) as unknown as Variant[],
+        product: productTyped,
+        variants: variantRows,
         images: (images ?? []) as unknown as ProductImage[],
         reviews: (reviews ?? []) as unknown as Review[],
       };
