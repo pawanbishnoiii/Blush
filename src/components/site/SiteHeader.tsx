@@ -1,8 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Icon3D } from "@/components/site/Icon3D";
+import { useAuth } from "@/hooks/useAuth";
 import { cartCount, useCart } from "@/lib/cart-store";
 import { cn } from "@/lib/utils";
 
@@ -20,12 +20,11 @@ const NAV = [
 export function SiteHeader() {
   const lines = useCart((s) => s.lines);
   const [count, setCount] = useState(0);
-  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user, loading } = useAuth();
 
   useEffect(() => setCount(cartCount(lines)), [lines]);
-  useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
