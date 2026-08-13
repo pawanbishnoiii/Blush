@@ -167,13 +167,13 @@ function OrderDetail() {
         <p className="text-xs text-muted-foreground">
           {status === "cancelled" ? "Refund in progress" : TRACKING_STEPS[idx]!.note}
         </p>
-        {status === "cancelled" && o["cancel_reason"] && (
+        {status === "cancelled" && Boolean(o["cancel_reason"]) && (
           <div className="mt-4 rounded-2xl bg-surface p-4 text-xs text-muted-foreground">
             <p>
               <span className="font-semibold text-foreground">Reason:</span>{" "}
               {String(o["cancel_reason"])}
             </p>
-            {o["refund_status"] && (
+            {Boolean(o["refund_status"]) && (
               <p className="mt-1 capitalize">
                 <span className="font-semibold text-foreground">Refund:</span>{" "}
                 {String(o["refund_status"]).replace(/_/g, " ")}
