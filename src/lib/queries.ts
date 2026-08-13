@@ -1,6 +1,8 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type {
+  Brand,
+  Category,
   Collection,
   Coupon,
   Product,
@@ -9,6 +11,57 @@ import type {
   SiteSettings,
   Variant,
 } from "@/lib/catalog";
+
+/* ---------- Brands & categories ---------- */
+export const brandsQuery = queryOptions({
+  queryKey: ["brands"],
+  queryFn: async (): Promise<Brand[]> => {
+    const { data, error } = await supabase
+      .from("brands")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as unknown as Brand[];
+  },
+});
+
+export const allBrandsQuery = queryOptions({
+  queryKey: ["brands", "all"],
+  queryFn: async (): Promise<Brand[]> => {
+    const { data, error } = await supabase
+      .from("brands")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as unknown as Brand[];
+  },
+});
+
+export const categoriesQuery = queryOptions({
+  queryKey: ["categories"],
+  queryFn: async (): Promise<Category[]> => {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as unknown as Category[];
+  },
+});
+
+export const allCategoriesQuery = queryOptions({
+  queryKey: ["categories", "all"],
+  queryFn: async (): Promise<Category[]> => {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as unknown as Category[];
+  },
+});
 
 export const productsQuery = queryOptions({
   queryKey: ["products"],
