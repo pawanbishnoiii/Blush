@@ -22,6 +22,7 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as WishlistRouteImport } from './routes/wishlist'
 import { Route as AccountAddressesRouteImport } from './routes/account.addresses'
+import { Route as AccountCouponsRouteImport } from './routes/account.coupons'
 import { Route as AccountNotificationsRouteImport } from './routes/account.notifications'
 import { Route as AccountRewardsRouteImport } from './routes/account.rewards'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
@@ -103,6 +104,11 @@ const WishlistRoute = WishlistRouteImport.update({
 const AccountAddressesRoute = AccountAddressesRouteImport.update({
   id: '/addresses',
   path: '/addresses',
+  getParentRoute: () => AccountRoute,
+} as any)
+const AccountCouponsRoute = AccountCouponsRouteImport.update({
+  id: '/coupons',
+  path: '/coupons',
   getParentRoute: () => AccountRoute,
 } as any)
 const AccountNotificationsRoute = AccountNotificationsRouteImport.update({
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/shop': typeof ShopRoute
   '/wishlist': typeof WishlistRoute
   '/account/addresses': typeof AccountAddressesRoute
+  '/account/coupons': typeof AccountCouponsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/rewards': typeof AccountRewardsRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -236,6 +243,7 @@ export interface FileRoutesByTo {
   '/shop': typeof ShopRoute
   '/wishlist': typeof WishlistRoute
   '/account/addresses': typeof AccountAddressesRoute
+  '/account/coupons': typeof AccountCouponsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/rewards': typeof AccountRewardsRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -269,6 +277,7 @@ export interface FileRoutesById {
   '/shop': typeof ShopRoute
   '/wishlist': typeof WishlistRoute
   '/account/addresses': typeof AccountAddressesRoute
+  '/account/coupons': typeof AccountCouponsRoute
   '/account/notifications': typeof AccountNotificationsRoute
   '/account/rewards': typeof AccountRewardsRoute
   '/admin/banners': typeof AdminBannersRoute
@@ -303,6 +312,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/wishlist'
     | '/account/addresses'
+    | '/account/coupons'
     | '/account/notifications'
     | '/account/rewards'
     | '/admin/banners'
@@ -334,6 +344,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/wishlist'
     | '/account/addresses'
+    | '/account/coupons'
     | '/account/notifications'
     | '/account/rewards'
     | '/admin/banners'
@@ -366,6 +377,7 @@ export interface FileRouteTypes {
     | '/shop'
     | '/wishlist'
     | '/account/addresses'
+    | '/account/coupons'
     | '/account/notifications'
     | '/account/rewards'
     | '/admin/banners'
@@ -501,6 +513,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountAddressesRouteImport
       parentRoute: typeof AccountRoute
     }
+    '/account/coupons': {
+      id: '/account/coupons'
+      path: '/coupons'
+      fullPath: '/account/coupons'
+      preLoaderRoute: typeof AccountCouponsRouteImport
+      parentRoute: typeof AccountRoute
+    }
     '/account/notifications': {
       id: '/account/notifications'
       path: '/notifications'
@@ -625,12 +644,14 @@ declare module '@tanstack/react-router' {
 
 interface AccountRouteChildren {
   AccountAddressesRoute: typeof AccountAddressesRoute
+  AccountCouponsRoute: typeof AccountCouponsRoute
   AccountNotificationsRoute: typeof AccountNotificationsRoute
   AccountRewardsRoute: typeof AccountRewardsRoute
 }
 
 const AccountRouteChildren: AccountRouteChildren = {
   AccountAddressesRoute: AccountAddressesRoute,
+  AccountCouponsRoute: AccountCouponsRoute,
   AccountNotificationsRoute: AccountNotificationsRoute,
   AccountRewardsRoute: AccountRewardsRoute,
 }

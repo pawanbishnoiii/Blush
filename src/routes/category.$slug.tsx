@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
 import { Icon3D } from "@/components/site/Icon3D";
+import { ProductFilterBar } from "@/components/site/ProductFilters";
+import { useProductFilters, type PriceRange } from "@/hooks/useProductFilters";
 import { productsQuery } from "@/lib/queries";
 import { BEAUTY, FASHION, VIBES } from "@/lib/taxonomy";
 import type { Product } from "@/lib/catalog";
@@ -44,7 +46,7 @@ function CategoryPage() {
   const products = useQuery(productsQuery);
   const title = label(slug);
 
-  const items = useMemo(() => {
+  const matches = useMemo(() => {
     const all: Product[] = products.data ?? [];
     const needle = slug.replace(/-/g, " ").toLowerCase();
     return all.filter(
@@ -58,14 +60,26 @@ function CategoryPage() {
     );
   }, [products.data, slug]);
 
+  const bounds: PriceRange = useMemo(() => {
+    if (matches.length === 0) return [0, 10000];
+    const prices = matches.map((p) => p.price_inr);
+    return [Math.min(...prices), Math.max(...prices)];
+  }, [matches]);
+
+  const filters = useProductFilters(matches, bounds);
+  const items = filters.filtered;
+
   return (
     <div className="mx-auto w-full max-w-[1400px] px-5 pb-24 pt-8 sm:px-8 md:pb-16">
-      <div className="flex min-w-0 items-center gap-4">
-        <Icon3D name={iconFor(slug)} size="xl" />
-        <div className="min-w-0">
-          <h1 className="truncate font-display text-3xl font-extrabold tracking-tight">{title}</h1>
-          <p className="text-sm text-muted-foreground">{items.length} products</p>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-4">
+          <Icon3D name={iconFor(slug)} size="xl" />
+          <div className="min-w-0">
+            <h1 className="truncate font-display text-3xl font-extrabold tracking-tight">{title}</h1>
+            <p className="text-sm text-muted-foreground">{items.length} products</p>
+          </div>
         </div>
+        {matches.length > 0 && <ProductFilterBar {...filters} />}
       </div>
 
       {products.isLoading ? (
@@ -76,17 +90,31 @@ function CategoryPage() {
         </div>
       ) : items.length === 0 ? (
         <div className="mt-16 flex flex-col items-center gap-4 text-center">
-          <Icon3D name="search" size="2xl" />
-          <p className="font-display text-xl font-bold">Nothing here yet</p>
-          <p className="max-w-sm text-sm text-muted-foreground">
-            This edit is being restocked. Browse everything while you wait.
+          <Icon3D name={matches.length === 0 ? "search" : "filters"} size="2xl" />
+          <p className="font-display text-xl font-bold">
+            {matches.length === 0 ? "Nothing here yet" : "No matches for these filters"}
           </p>
-          <Link
-            to="/shop"
-            className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground"
-          >
-            Browse all
-          </Link>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            {matches.length === 0
+              ? "This edit is being restocked. Browse everything while you wait."
+              : "Try widening the price range or clearing a filter."}
+          </p>
+          {matches.length === 0 ? (
+            <Link
+              to="/shop"
+              className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground"
+            >
+              Browse all
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={filters.reset}
+              className="rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground"
+            >
+              Reset filters
+            </button>
+          )}
         </div>
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

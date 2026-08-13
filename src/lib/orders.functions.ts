@@ -46,9 +46,24 @@ export const placeOrder = createServerFn({ method: "POST" })
       .select("id, product_id, color_name, size, stock, price_delta")
       .in("id", variantIds);
     if (vErr) throw new Error(vErr.message);
-    if (!variants || variants.length !== variantIds.length) throw new Error("Some items are no longer available");
 
-    const productIds = [...new Set(variants.map((v) => v.product_id))];
+    // Some products are sold as single-SKU items with no product_variants row.
+    // In that case the client sends the product id as the variant id (synthetic variant).
+    const foundIds = new Set((variants ?? []).map((v) => v.id));
+    const syntheticIds = variantIds.filter((id) => !foundIds.has(id));
+
+    const { data: syntheticProducts, error: synErr } = await supabaseAdmin
+      .from("products")
+      .select("id, name, price_inr, image_key")
+      .in("id", syntheticIds);
+    if (synErr) throw new Error(synErr.message);
+
+    const productIds = [
+      ...new Set([
+        ...(variants ?? []).map((v) => v.product_id),
+        ...(syntheticProducts ?? []).map((p) => p.id),
+      ]),
+    ];
     const { data: products, error: pErr } = await supabaseAdmin
       .from("products")
       .select("id, name, price_inr, image_key")
@@ -86,23 +101,35 @@ export const placeOrder = createServerFn({ method: "POST" })
 
     let subtotal = 0;
     const lines = data.items.map((item) => {
-      const variant = variants.find((v) => v.id === item.variantId)!;
-      const product = products?.find((p) => p.id === variant.product_id);
+      const variant = (variants ?? []).find((v) => v.id === item.variantId);
+      const syntheticProduct = (syntheticProducts ?? []).find((p) => p.id === item.variantId);
+      if (!variant && !syntheticProduct) throw new Error("Some items are no longer available");
+
+      const product = (products ?? []).find((p) =>
+        variant ? p.id === variant.product_id : p.id === syntheticProduct!.id,
+      );
       if (!product) throw new Error("Product unavailable");
-      if (variant.stock < item.quantity) {
-        throw new Error(`${product.name} (${variant.color_name} / ${variant.size}) is out of stock`);
+
+      if (variant) {
+        if (variant.stock < item.quantity) {
+          throw new Error(`${product.name} (${variant.color_name} / ${variant.size}) is out of stock`);
+        }
       }
-      const unitPrice = product.price_inr + variant.price_delta;
+
+      const unitPrice = product.price_inr + (variant?.price_delta ?? 0);
       subtotal += unitPrice * item.quantity;
       return {
         product_id: product.id,
-        variant_id: variant.id,
+        variant_id: variant ? variant.id : product.id,
         name: product.name,
-        variant_label: `${variant.color_name} · ${variant.size}`,
+        variant_label: variant
+          ? `${variant.color_name} · ${variant.size}`
+          : "Default · One Size",
         image_key: product.image_key,
         unit_price: unitPrice,
         quantity: item.quantity,
-        newStock: variant.stock - item.quantity,
+        newStock: variant ? variant.stock - item.quantity : null,
+        variantIdForUpdate: variant ? variant.id : null,
       };
     });
 
