@@ -535,11 +535,13 @@ function ProductPage() {
               <Icon3D name="collections" size="md" />
               <h2 className="section-type">Complete the look</h2>
             </div>
-            <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-              {completeLook.map((p, i) => (
-                <ProductCard key={p.id} product={p} index={i} />
-              ))}
-            </div>
+            <ScrollFx variant="stagger-scale">
+              <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                {completeLook.map((p, i) => (
+                  <ProductCard key={p.id} product={p} index={i} />
+                ))}
+              </div>
+            </ScrollFx>
           </section>
         )}
 
@@ -604,11 +606,13 @@ function ProductPage() {
         {similar.length > 0 && (
           <section className="mt-20">
             <h2 className="section-type">You may also like</h2>
-            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {similar.map((p, i) => (
-                <ProductCard key={p.id} product={p} index={i} />
-              ))}
-            </div>
+            <ScrollFx variant="stagger">
+              <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {similar.map((p, i) => (
+                  <ProductCard key={p.id} product={p} index={i} />
+                ))}
+              </div>
+            </ScrollFx>
           </section>
         )}
       </div>
