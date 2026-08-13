@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const itemSchema = z.object({
@@ -39,6 +41,19 @@ export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => placeOrderSchema.parse(data))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Link the order to the signed-in shopper when a bearer token is present.
+    let userId: string | null = null;
+    try {
+      const auth = getRequest()?.headers.get("authorization") ?? "";
+      const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+      if (token && token.split(".").length === 3) {
+        const { data: u } = await supabaseAdmin.auth.getUser(token);
+        userId = u.user?.id ?? null;
+      }
+    } catch {
+      userId = null;
+    }
 
     const variantIds = data.items.map((i) => i.variantId);
     const { data: variants, error: vErr } = await supabaseAdmin
@@ -159,6 +174,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       .from("orders")
       .insert({
         order_code: makeOrderCode(),
+        user_id: userId,
         full_name: data.fullName,
         email: data.email,
         phone: data.phone,
