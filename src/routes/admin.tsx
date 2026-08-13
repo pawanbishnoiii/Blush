@@ -23,8 +23,10 @@ export const Route = createFileRoute("/admin")({
 const NAV: { to: string; label: string; icon: Icon3DName }[] = [
   { to: "/admin", label: "Dashboard", icon: "store" },
   { to: "/admin/products", label: "Products", icon: "women-fashion" },
+  { to: "/admin/categories", label: "Categories", icon: "collections" },
+  { to: "/admin/brands", label: "Brands", icon: "best-sellers" },
   { to: "/admin/orders", label: "Orders", icon: "my-orders" },
-  { to: "/admin/banners", label: "Banners", icon: "collections" },
+  { to: "/admin/banners", label: "Banners", icon: "offers" },
   { to: "/admin/delivery", label: "Delivery", icon: "fast-delivery" },
   { to: "/admin/reviews", label: "Reviews", icon: "camera-review" },
   { to: "/admin/customers", label: "Customers", icon: "profile" },
