@@ -228,13 +228,15 @@ function Home() {
             className="relative"
           >
             <div className="overflow-hidden rounded-[2rem] shadow-lift">
-              <img
-                src={banner?.image_url ?? heroImage}
-                alt={banner?.title ?? "Shop your vibe — fashion, beauty and accessories"}
-                width={1536}
-                height={1024}
-                className="w-full object-cover"
-              />
+              <ScrollFx variant="parallax" distance={26}>
+                <img
+                  src={banner?.image_url ?? heroImage}
+                  alt={banner?.title ?? "Shop your vibe — fashion, beauty and accessories"}
+                  width={1536}
+                  height={1024}
+                  className="w-full scale-110 object-cover"
+                />
+              </ScrollFx>
             </div>
             <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-2xl bg-card/95 px-3 py-2 shadow-lift backdrop-blur">
               <Icon3D name="fast-delivery" size="sm" />
