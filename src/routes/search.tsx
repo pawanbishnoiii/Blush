@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { Search as SearchIcon, X, Clock, TrendingUp } from "lucide-react";
 import { Icon3D, Icon3DTile } from "@/components/site/Icon3D";
 import { ProductCard } from "@/components/site/ProductCard";
+import { ProductFilterBar } from "@/components/site/ProductFilters";
+import { useProductFilters } from "@/hooks/useProductFilters";
 import { useRecentSearches } from "@/hooks/useRecentSearches";
 import { productsQuery } from "@/lib/queries";
 import { DISCOVERY, FASHION, BEAUTY } from "@/lib/taxonomy";
@@ -29,7 +31,7 @@ function SearchPage() {
   const products = useQuery(productsQuery);
   const { recent, add, remove, clear } = useRecentSearches();
 
-  const results = useMemo(() => {
+  const matches = useMemo(() => {
     const needle = q.trim().toLowerCase();
     if (!needle) return [];
     return (products.data ?? []).filter((p) =>
@@ -39,6 +41,9 @@ function SearchPage() {
         .includes(needle),
     );
   }, [q, products.data]);
+
+  const filters = useProductFilters(matches);
+  const results = filters.filtered;
 
   const runSearch = (term: string) => {
     setQ(term);
@@ -139,13 +144,25 @@ function SearchPage() {
         <div className="mt-16 flex flex-col items-center gap-3 text-center">
           <Icon3D name="search" size="2xl" />
           <p className="font-display text-lg font-bold">No matches for “{q}”</p>
-          <p className="text-sm text-muted-foreground">Try a shorter word or browse categories.</p>
+          <p className="text-sm text-muted-foreground">
+            {matches.length > 0 ? "Try loosening your filters." : "Try a shorter word or browse categories."}
+          </p>
+          {matches.length > 0 && (
+            <button type="button" onClick={filters.reset} className="rounded-full border border-border px-4 py-2 text-xs font-bold">
+              Reset filters
+            </button>
+          )}
         </div>
       )}
 
-      {results.length > 0 && (
+      {q && (
         <>
-          <p className="mt-8 text-sm text-muted-foreground">{results.length} results for “{q}”</p>
+          <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {results.length} results for “{q}”
+            </p>
+            <ProductFilterBar {...filters} />
+          </div>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {results.map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />

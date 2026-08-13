@@ -1,8 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Icon3D } from "@/components/site/Icon3D";
+import { useAuth } from "@/hooks/useAuth";
 import { cartCount, useCart } from "@/lib/cart-store";
 import { cn } from "@/lib/utils";
 
@@ -20,12 +20,10 @@ const NAV = [
 export function SiteHeader() {
   const lines = useCart((s) => s.lines);
   const [count, setCount] = useState(0);
-  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { user, loading } = useAuth();
 
   useEffect(() => setCount(cartCount(lines)), [lines]);
-  useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
     onScroll();
@@ -124,52 +122,28 @@ export function SiteHeader() {
           >
             <Icon3D name="profile" size="xs" />
           </Link>
-          <button
-            aria-label="Menu"
-            onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card md:hidden"
-          >
-            {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-          </button>
+          {loading ? (
+            <span className="h-10 w-20 animate-pulse rounded-full bg-muted" />
+          ) : user ? (
+            <Link
+              to="/account"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-xs font-bold sm:hidden"
+            >
+              <Icon3D name="profile" size="xs" className="h-5 w-5" />
+              You
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-soft transition-transform active:scale-95"
+            >
+              <Icon3D name="profile" size="xs" className="h-5 w-5" />
+              Login
+            </Link>
+          )}
         </div>
       </div>
 
-      <AnimatePresence>
-        {open && (
-          <motion.nav
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-b border-border glass-bar md:hidden"
-          >
-            <div className="flex flex-col gap-1 px-5 py-4">
-              {NAV.map((n) =>
-                "params" in n ? (
-                  <Link
-                    key={n.label}
-                    to={n.to}
-                    params={n.params}
-                    className="rounded-xl px-3 py-3 text-base font-semibold"
-                  >
-                    {n.label}
-                  </Link>
-                ) : (
-                  <Link key={n.label} to={n.to} className="rounded-xl px-3 py-3 text-base font-semibold">
-                    {n.label}
-                  </Link>
-                ),
-              )}
-              <Link to="/orders" className="rounded-xl px-3 py-3 text-base font-semibold">
-                Track order
-              </Link>
-              <Link to="/account" className="rounded-xl px-3 py-3 text-base font-semibold">
-                Your account
-              </Link>
-            </div>
-          </motion.nav>
-        )}
-      </AnimatePresence>
     </header>
   );
 }

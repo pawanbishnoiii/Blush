@@ -205,6 +205,90 @@ export type Database = {
         }
         Relationships: []
       }
+      brands: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          slug: string
+          sort_order: number
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          gender: string
+          icon: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          parent_slug: string | null
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          gender?: string
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          parent_slug?: string | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          gender?: string
+          icon?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          parent_slug?: string | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       collection_products: {
         Row: {
           collection_id: string
@@ -570,6 +654,8 @@ export type Database = {
         Row: {
           address_line1: string
           address_line2: string | null
+          cancel_reason: string | null
+          cancelled_at: string | null
           city: string
           courier: string | null
           created_at: string
@@ -583,6 +669,7 @@ export type Database = {
           payment_method: string
           phone: string
           pincode: string
+          refund_status: string | null
           shipping: number
           state: string
           status: string
@@ -595,6 +682,8 @@ export type Database = {
         Insert: {
           address_line1: string
           address_line2?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
           city: string
           courier?: string | null
           created_at?: string
@@ -608,6 +697,7 @@ export type Database = {
           payment_method: string
           phone: string
           pincode: string
+          refund_status?: string | null
           shipping: number
           state: string
           status?: string
@@ -620,6 +710,8 @@ export type Database = {
         Update: {
           address_line1?: string
           address_line2?: string | null
+          cancel_reason?: string | null
+          cancelled_at?: string | null
           city?: string
           courier?: string | null
           created_at?: string
@@ -633,6 +725,7 @@ export type Database = {
           payment_method?: string
           phone?: string
           pincode?: string
+          refund_status?: string | null
           shipping?: number
           state?: string
           status?: string
@@ -744,9 +837,12 @@ export type Database = {
       }
       products: {
         Row: {
+          about: string | null
           badge: string | null
+          brand_id: string | null
           care: string | null
           category: string
+          category_slug: string | null
           compare_at_inr: number | null
           created_at: string
           description: string
@@ -757,11 +853,14 @@ export type Database = {
           image_key: string
           is_featured: boolean
           is_published: boolean
+          is_returnable: boolean
           mood_tags: string[]
           name: string
           occasion_tags: string[]
           price_inr: number
           rating: number
+          refund_policy: string
+          return_days: number
           review_count: number
           seo_description: string | null
           seo_title: string | null
@@ -772,11 +871,15 @@ export type Database = {
           subcategory: string | null
           tagline: string
           vibe_tags: string[]
+          weight_grams: number | null
         }
         Insert: {
+          about?: string | null
           badge?: string | null
+          brand_id?: string | null
           care?: string | null
           category: string
+          category_slug?: string | null
           compare_at_inr?: number | null
           created_at?: string
           description: string
@@ -787,11 +890,14 @@ export type Database = {
           image_key: string
           is_featured?: boolean
           is_published?: boolean
+          is_returnable?: boolean
           mood_tags?: string[]
           name: string
           occasion_tags?: string[]
           price_inr: number
           rating?: number
+          refund_policy?: string
+          return_days?: number
           review_count?: number
           seo_description?: string | null
           seo_title?: string | null
@@ -802,11 +908,15 @@ export type Database = {
           subcategory?: string | null
           tagline: string
           vibe_tags?: string[]
+          weight_grams?: number | null
         }
         Update: {
+          about?: string | null
           badge?: string | null
+          brand_id?: string | null
           care?: string | null
           category?: string
+          category_slug?: string | null
           compare_at_inr?: number | null
           created_at?: string
           description?: string
@@ -817,11 +927,14 @@ export type Database = {
           image_key?: string
           is_featured?: boolean
           is_published?: boolean
+          is_returnable?: boolean
           mood_tags?: string[]
           name?: string
           occasion_tags?: string[]
           price_inr?: number
           rating?: number
+          refund_policy?: string
+          return_days?: number
           review_count?: number
           seo_description?: string | null
           seo_title?: string | null
@@ -832,8 +945,17 @@ export type Database = {
           subcategory?: string | null
           tagline?: string
           vibe_tags?: string[]
+          weight_grams?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

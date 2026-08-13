@@ -31,6 +31,40 @@ export type Product = {
   seo_title: string | null;
   seo_description: string | null;
   created_at?: string;
+} & Partial<ProductExtras>;
+
+export type ProductExtras = {
+  brand_id: string | null;
+  category_slug: string | null;
+  about: string | null;
+  weight_grams: number | null;
+  refund_policy: string | null;
+  return_days: number | null;
+  is_returnable: boolean | null;
+};
+
+export type Brand = {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string | null;
+  description: string | null;
+  logo_url: string | null;
+  is_active: boolean;
+  sort_order: number;
+};
+
+export type Category = {
+  id: string;
+  slug: string;
+  name: string;
+  parent_slug: string | null;
+  gender: string | null;
+  icon: string | null;
+  image_url: string | null;
+  description: string | null;
+  is_active: boolean;
+  sort_order: number;
 };
 
 export type Variant = {
