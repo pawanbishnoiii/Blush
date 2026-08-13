@@ -1,9 +1,14 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Icon3D } from "@/components/site/Icon3D";
 import { ProductCard } from "@/components/site/ProductCard";
 import { productsQuery } from "@/lib/queries";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useCart } from "@/lib/cart-store";
+import { supabase } from "@/integrations/supabase/client";
+import type { Variant } from "@/lib/catalog";
 
 export const Route = createFileRoute("/wishlist")({
   head: () => ({
@@ -51,10 +56,84 @@ function WishlistPage() {
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {saved.map((p, i) => (
-            <ProductCard key={p.id} product={p} index={i} />
+            <WishlistCard key={p.id} product={p} index={i} />
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+function WishlistCard({ product, index }: { product: ReturnType<typeof useQuery>["data"] extends never ? never : any; index: number }) {
+  const wishlist = useWishlist();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const addToCart = useCart((s) => s.add);
+  const [moving, setMoving] = useState(false);
+
+  async function moveToBag() {
+    setMoving(true);
+    try {
+      const { data: variants, error } = await supabase
+        .from("product_variants")
+        .select("*")
+        .eq("product_id", product.id)
+        .order("sort_order", { ascending: true });
+      if (error) throw error;
+      const list = (variants ?? []) as unknown as Variant[];
+      if (list.length === 1) {
+        const v = list[0]!;
+        addToCart({
+          variantId: v.id,
+          productId: product.id,
+          slug: product.slug,
+          name: product.name,
+          imageKey: product.image_key,
+          colorName: v.color_name,
+          size: v.size,
+          unitPrice: product.price_inr + (v.price_delta ?? 0),
+          compareAt: product.compare_at_inr,
+          quantity: 1,
+          maxStock: v.stock,
+        });
+        toast.success(`${product.name} added to bag`, {
+          description: `${v.color_name} · ${v.size}`,
+        });
+      } else {
+        navigate({ to: "/product/$slug", params: { slug: product.slug }, search: { quickadd: "1" } as any });
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't move this to bag");
+    } finally {
+      setMoving(false);
+    }
+  }
+
+  function remove() {
+    wishlist.toggle(product.id);
+    qc.invalidateQueries({ queryKey: ["wishlist"] });
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <ProductCard product={product} index={index} />
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={moveToBag}
+          disabled={moving}
+          className="flex-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground disabled:opacity-60"
+        >
+          {moving ? "Moving…" : "Move to bag"}
+        </button>
+        <button
+          type="button"
+          onClick={remove}
+          className="rounded-full border border-border bg-card px-3 py-2 text-xs font-bold text-muted-foreground"
+        >
+          Remove
+        </button>
+      </div>
     </div>
   );
 }
