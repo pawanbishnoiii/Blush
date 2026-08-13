@@ -141,6 +141,49 @@ function AdminOrders() {
                     eta={o.eta ?? ""}
                     onSave={(c, t, e) => saveShipping(o.id, c, t, e)}
                   />
+
+                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const i = FLOW.indexOf(String(o.status) as (typeof FLOW)[number]);
+                        const next = FLOW[Math.min(i + 1, FLOW.length - 1)]!;
+                        setStatus(o.id, next, next.replace(/_/g, " ").replace(/^\w/, (c) => c.toUpperCase()));
+                      }}
+                      className="rounded-full bg-secondary px-4 py-2 text-[11px] font-bold text-secondary-foreground"
+                    >
+                      Advance tracking →
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const reason = window.prompt("Cancellation reason?", "Cancelled by store");
+                        if (reason === null) return;
+                        setStatus(o.id, "cancelled", "Cancelled", reason);
+                      }}
+                      className="rounded-full border border-destructive px-4 py-2 text-[11px] font-bold text-destructive"
+                    >
+                      Cancel order
+                    </button>
+                    <span className="text-[11px] text-muted-foreground">
+                      Refund: {String(o.refund_status ?? "none")}
+                    </span>
+                    {["processing", "refunded", "none"].map((r) => (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setRefund(o.id, r)}
+                        className={cn(
+                          "rounded-full border px-3 py-1.5 text-[11px] font-bold capitalize",
+                          o.refund_status === r ? "border-transparent bg-primary text-primary-foreground" : "border-border",
+                        )}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+
+                  <NoteForm onAdd={(note) => setStatus(o.id, String(o.status), "Update", note)} />
                 </div>
               )}
             </div>
@@ -148,6 +191,31 @@ function AdminOrders() {
         })}
         {list.length === 0 && <p className="text-sm text-muted-foreground">No orders in this view.</p>}
       </div>
+    </div>
+  );
+}
+
+function NoteForm({ onAdd }: { onAdd: (note: string) => void }) {
+  const [note, setNote] = useState("");
+  return (
+    <div className="mt-3 flex gap-2">
+      <input
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Add a tracking note the customer will see"
+        className="min-w-0 flex-1 rounded-full border border-border bg-background px-4 py-2 text-xs outline-none"
+      />
+      <button
+        type="button"
+        onClick={() => {
+          if (!note.trim()) return;
+          onAdd(note.trim());
+          setNote("");
+        }}
+        className="shrink-0 rounded-full border border-border px-4 py-2 text-[11px] font-bold"
+      >
+        Add note
+      </button>
     </div>
   );
 }
