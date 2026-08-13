@@ -23,7 +23,7 @@ export function BottomNav() {
   const lines = useCart((s) => s.lines);
   const count = cartCount(lines);
   const { ids } = useWishlist();
-  const wishCount = ids.length;
+  const wishCount = ids.size;
 
   return (
     <nav
