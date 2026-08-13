@@ -370,7 +370,7 @@ function Checkout() {
                 {lines.map((l) => (
                   <li key={l.variantId} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3">
                     <img
-                      src={imageFor(l.imageKey)}
+                      src={resolveLineImage({ productId: l.productId, variantId: l.variantId, imageKey: l.imageKey }, productImages.data)}
                       alt={l.name}
                       loading="lazy"
                       className="h-14 w-12 shrink-0 rounded-lg object-cover"

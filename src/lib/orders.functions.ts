@@ -222,9 +222,14 @@ export const placeOrder = createServerFn({ method: "POST" })
     ]);
 
     await Promise.all(
-      lines.map((l) =>
-        supabaseAdmin.from("product_variants").update({ stock: l.newStock }).eq("id", l.variant_id),
-      ),
+      lines
+        .filter((l) => l.newStock !== null && l.variant_id)
+        .map((l) =>
+          supabaseAdmin
+            .from("product_variants")
+            .update({ stock: l.newStock as number })
+            .eq("id", l.variant_id as string),
+        ),
     );
 
     return { orderCode: order.order_code, total, shipping, subtotal, discount };
