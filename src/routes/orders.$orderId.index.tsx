@@ -1,10 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Icon3D } from "@/components/site/Icon3D";
 import { orderDetailQuery } from "@/lib/queries";
+import { cancelOrder } from "@/lib/orders.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { inr, TRACKING_STEPS, stepIndex } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +30,14 @@ export const Route = createFileRoute("/orders/$orderId/")({
   component: OrderDetail,
 });
 
+const CANCEL_REASONS = [
+  "Ordered by mistake",
+  "Found a better price",
+  "Delivery is taking too long",
+  "Want a different size or colour",
+  "Changed my mind",
+];
+
 type OrderItem = {
   id: string;
   name: string;
@@ -35,6 +51,11 @@ function OrderDetail() {
   const { orderId } = Route.useParams();
   const qc = useQueryClient();
   const order = useQuery(orderDetailQuery(orderId));
+  const runCancel = useServerFn(cancelOrder);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [reason, setReason] = useState(CANCEL_REASONS[0]!);
+  const [customReason, setCustomReason] = useState("");
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     const channel = supabase
@@ -70,17 +91,31 @@ function OrderDetail() {
   const items = (o["order_items"] ?? []) as OrderItem[];
   const status = String(o["status"]);
   const idx = stepIndex(status);
-  const cancellable = ["placed", "confirmed", "packed"].includes(status);
+  const cancellable = ["placed", "confirmed", "processing", "packed"].includes(status);
 
-  async function cancel() {
-    const { error } = await supabase.from("orders").update({ status: "cancelled" }).eq("id", orderId);
-    if (error) {
-      toast.error(error.message);
+  async function confirmCancel() {
+    const finalReason = (reason === "Other" ? customReason : reason).trim();
+    if (finalReason.length < 3) {
+      toast.error("Tell us why you're cancelling");
       return;
     }
-    await qc.invalidateQueries({ queryKey: ["order", orderId] });
-    await qc.invalidateQueries({ queryKey: ["my_orders"] });
-    toast.success("Order cancelled. Refund starts within 24 hours.");
+    setCancelling(true);
+    try {
+      const res = await runCancel({ data: { orderId, reason: finalReason } });
+      await qc.invalidateQueries({ queryKey: ["order", orderId] });
+      await qc.invalidateQueries({ queryKey: ["my_orders"] });
+      setCancelOpen(false);
+      toast.success("Order cancelled", {
+        description:
+          res.refundStatus === "initiated"
+            ? "Refund initiated — 5–7 working days to your original payment method."
+            : "Nothing was charged for this cash-on-delivery order.",
+      });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not cancel this order");
+    } finally {
+      setCancelling(false);
+    }
   }
 
   async function requestReturn() {
@@ -132,6 +167,20 @@ function OrderDetail() {
         <p className="text-xs text-muted-foreground">
           {status === "cancelled" ? "Refund in progress" : TRACKING_STEPS[idx]!.note}
         </p>
+        {status === "cancelled" && o["cancel_reason"] && (
+          <div className="mt-4 rounded-2xl bg-surface p-4 text-xs text-muted-foreground">
+            <p>
+              <span className="font-semibold text-foreground">Reason:</span>{" "}
+              {String(o["cancel_reason"])}
+            </p>
+            {o["refund_status"] && (
+              <p className="mt-1 capitalize">
+                <span className="font-semibold text-foreground">Refund:</span>{" "}
+                {String(o["refund_status"]).replace(/_/g, " ")}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Items */}
@@ -183,7 +232,7 @@ function OrderDetail() {
         {cancellable && (
           <button
             type="button"
-            onClick={cancel}
+            onClick={() => setCancelOpen(true)}
             className="rounded-full border border-destructive/40 px-5 py-3 text-sm font-bold text-destructive"
           >
             Cancel order
@@ -202,6 +251,59 @@ function OrderDetail() {
           Refund policy
         </Link>
       </div>
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent className="max-w-md rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl font-extrabold">Cancel this order?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Let us know why — it helps us fix what went wrong.
+          </p>
+          <div className="mt-2 space-y-2">
+            {[...CANCEL_REASONS, "Other"].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setReason(r)}
+                className={cn(
+                  "w-full rounded-2xl border px-4 py-2.5 text-left text-sm font-semibold transition-colors",
+                  reason === r ? "border-primary bg-primary/10" : "border-border bg-card",
+                )}
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+          {reason === "Other" && (
+            <textarea
+              value={customReason}
+              onChange={(e) => setCustomReason(e.target.value)}
+              rows={3}
+              maxLength={240}
+              placeholder="Tell us more"
+              className="mt-2 w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary"
+            />
+          )}
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={() => setCancelOpen(false)}
+              className="flex-1 rounded-full border border-border px-5 py-3 text-sm font-bold"
+            >
+              Keep order
+            </button>
+            <button
+              type="button"
+              disabled={cancelling}
+              onClick={() => void confirmCancel()}
+              className="flex-1 rounded-full bg-destructive px-5 py-3 text-sm font-bold text-destructive-foreground disabled:opacity-50"
+            >
+              {cancelling ? "Cancelling…" : "Confirm cancel"}
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
