@@ -31,7 +31,7 @@ export type Product = {
   seo_title: string | null;
   seo_description: string | null;
   created_at?: string;
-};
+} & Partial<ProductExtras>;
 
 export type ProductExtras = {
   brand_id: string | null;
