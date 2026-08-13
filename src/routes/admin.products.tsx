@@ -28,7 +28,7 @@ const SIZE_PRESETS: Record<string, string[]> = {
 };
 
 type Draft = {
-  id?: string;
+  id?: string | undefined;
   slug: string;
   name: string;
   tagline: string;
