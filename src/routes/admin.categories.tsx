@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Area, Field, ImageUploader, Select, Toggle } from "@/components/admin/AdminForm";
 import { Icon3D } from "@/components/site/Icon3D";
 import { allCategoriesQuery } from "@/lib/queries";
-import { ICON3D_NAMES, type Icon3DName } from "@/lib/icons3d";
+import { ICON_3D_NAMES, type Icon3DName } from "@/lib/icons3d";
 import type { Category } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 
@@ -128,7 +128,7 @@ function AdminCategories() {
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">Icon</p>
             <div className="grid max-h-48 grid-cols-6 gap-2 overflow-y-auto rounded-2xl border border-border p-2">
-              {ICON3D_NAMES.map((n) => (
+              {ICON_3D_NAMES.map((n) => (
                 <button
                   key={n}
                   type="button"
