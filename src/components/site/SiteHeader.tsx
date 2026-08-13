@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Icon3D } from "@/components/site/Icon3D";
@@ -21,7 +21,6 @@ export function SiteHeader() {
   const lines = useCart((s) => s.lines);
   const [count, setCount] = useState(0);
   const [scrolled, setScrolled] = useState(false);
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user, loading } = useAuth();
 
   useEffect(() => setCount(cartCount(lines)), [lines]);
