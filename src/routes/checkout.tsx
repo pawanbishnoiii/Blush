@@ -6,21 +6,24 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { motion } from "motion/react";
-import { Loader2, MapPin, Lock, Banknote, Smartphone, CreditCard } from "lucide-react";
+import { Loader2, MapPin, Lock, Banknote, Smartphone, CreditCard, Tag, X } from "lucide-react";
 import { toast } from "sonner";
 import { cartSubtotal, useCart } from "@/lib/cart-store";
-import { settingsQuery } from "@/lib/queries";
-import { deliveryEstimate, imageFor, inr } from "@/lib/catalog";
+import { myAddressesQuery, productImagesQuery, settingsQuery } from "@/lib/queries";
+import { couponDiscount, couponError as couponErrorFor, deliveryEstimate, inr, type Coupon } from "@/lib/catalog";
+import { resolveLineImage } from "@/lib/image";
 import { placeOrder } from "@/lib/orders.functions";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
-      { title: "Checkout — Esko" },
+      { title: "Checkout — Blush" },
       { name: "description", content: "Secure one-page checkout with UPI, cards and cash on delivery." },
-      { property: "og:title", content: "Checkout — Esko" },
-      { property: "og:description", content: "Secure one-page Esko checkout." },
+      { property: "og:title", content: "Checkout — Blush" },
+      { property: "og:description", content: "Secure one-page Blush checkout." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
