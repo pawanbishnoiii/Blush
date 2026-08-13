@@ -86,6 +86,21 @@ export const couponsQuery = queryOptions({
   },
 });
 
+export const myAddressesQuery = queryOptions({
+  queryKey: ["my_addresses"],
+  queryFn: async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return [];
+    const { data, error } = await supabase
+      .from("addresses")
+      .select("*")
+      .order("is_default", { ascending: false })
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
 export const faqsQuery = queryOptions({
   queryKey: ["faqs"],
   queryFn: async () => {

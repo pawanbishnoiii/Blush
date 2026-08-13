@@ -225,3 +225,25 @@ export const ADMIN_NAV: (IconEntry & { to: string })[] = [
   { icon: "notifications", label: "Notifications", to: "/admin/notifications" },
   { icon: "rewards", label: "Automation", to: "/admin/automation" },
 ];
+
+/** Occasion tags used for product filtering (matches `products.occasion_tags`). */
+export const OCCASIONS: { key: string; label: string }[] = [
+  { key: "everyday", label: "Everyday" },
+  { key: "office", label: "Office" },
+  { key: "college", label: "College" },
+  { key: "party", label: "Party" },
+  { key: "festive", label: "Festive" },
+  { key: "wedding", label: "Wedding" },
+  { key: "date-night", label: "Date Night" },
+  { key: "travel", label: "Travel" },
+  { key: "self-care", label: "Self-care" },
+];
+
+export type SortKey = "newest" | "price-asc" | "price-desc" | "top-rated";
+
+export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "newest", label: "Newest" },
+  { key: "price-asc", label: "Price: Low to High" },
+  { key: "price-desc", label: "Price: High to Low" },
+  { key: "top-rated", label: "Top Rated" },
+];

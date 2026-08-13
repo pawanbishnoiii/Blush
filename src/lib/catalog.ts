@@ -30,6 +30,7 @@ export type Product = {
   size_chart: Record<string, Record<string, string>> | null;
   seo_title: string | null;
   seo_description: string | null;
+  created_at?: string;
 };
 
 export type Variant = {
@@ -97,7 +98,29 @@ export type Coupon = {
   max_discount: number | null;
   expires_at: string | null;
   is_active: boolean;
+  used_count: number;
+  usage_limit: number | null;
+  per_user_limit: number;
 };
+
+/** Compute the discount amount a coupon yields against a given subtotal, or 0 if inapplicable. */
+export function couponDiscount(coupon: Pick<Coupon, "kind" | "value" | "max_discount">, subtotal: number): number {
+  const raw = coupon.kind === "percent" ? Math.round((subtotal * coupon.value) / 100) : coupon.value;
+  const capped = coupon.max_discount ? Math.min(raw, coupon.max_discount) : raw;
+  return Math.max(0, Math.min(capped, subtotal));
+}
+
+export function couponError(
+  coupon: Coupon | null | undefined,
+  subtotal: number,
+): string | null {
+  if (!coupon) return "Coupon not found";
+  if (!coupon.is_active) return "This coupon is no longer active";
+  if (coupon.expires_at && new Date(coupon.expires_at).getTime() < Date.now()) return "This coupon has expired";
+  if (subtotal < coupon.min_cart) return `Add ${inr(coupon.min_cart - subtotal)} more to use this coupon`;
+  if (coupon.usage_limit != null && coupon.used_count >= coupon.usage_limit) return "This coupon has been fully redeemed";
+  return null;
+}
 
 export type SiteSettings = {
   free_delivery_threshold: number;
