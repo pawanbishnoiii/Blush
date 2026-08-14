@@ -69,10 +69,17 @@ function AccountPage() {
   const unread = (notifications.data ?? []).filter((n) => !n.is_read).length;
 
   async function save() {
-    const { error } = await supabase
-      .from("profiles")
-      .update({ display_name: name, whatsapp, phone: whatsapp, preferred_moods: moods })
-      .eq("id", user!.id);
+    const { error } = await supabase.from("profiles").upsert(
+      {
+        id: user!.id,
+        display_name: name,
+        whatsapp,
+        phone: whatsapp,
+        preferred_moods: moods,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" },
+    );
     if (error) {
       toast.error(error.message);
       return;
