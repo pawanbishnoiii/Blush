@@ -39,20 +39,22 @@ function WishlistPage() {
         </div>
       </div>
 
-      {!wishlist.signedIn ? (
-        <Empty
-          title="Sign in to see your saves"
-          body="Your wishlist follows you across devices once you sign in."
-          cta="Sign in"
-          to="/auth"
-        />
-      ) : saved.length === 0 ? (
+      {saved.length === 0 ? (
+        wishlist.signedIn ? (
         <Empty
           title="Nothing saved yet"
           body="Tap the heart on anything you love and it lands here."
           cta="Start browsing"
           to="/shop"
         />
+        ) : (
+          <Empty
+            title="Nothing saved yet"
+            body="Tap the heart on anything you love — sign in to sync your saves across devices."
+            cta="Sign in"
+            to="/auth"
+          />
+        )
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {saved.map((p, i) => (
