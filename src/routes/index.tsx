@@ -10,6 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ProductCard } from "@/components/site/ProductCard";
+import { HeroSlider } from "@/components/site/HeroSlider";
 import { Reveal } from "@/components/site/Reveal";
 import { ScrollFx, type ScrollFxVariant } from "@/components/site/ScrollFx";
 import { Stars } from "@/components/site/Stars";
@@ -115,12 +116,13 @@ function Home() {
   const products = useQuery(productsQuery);
   const reviews = useQuery(reviewsQuery);
   const faqs = useQuery(faqsQuery);
-  const heroBanners = useQuery(bannersQuery("home_hero"));
+  const heroBanners = useQuery(bannersQuery("hero"));
   const [mood, setMood] = useState<MoodKey>("cute");
 
   const all: Product[] = useMemo(() => products.data ?? [], [products.data]);
   const activeMood = MOODS.find((m) => m.key === mood)!;
-  const banner = heroBanners.data?.[0];
+  const slides = heroBanners.data ?? [];
+  const banner = slides[0];
 
   const byMood = useMemo(() => {
     const matched = all.filter(
@@ -227,17 +229,7 @@ function Home() {
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="relative"
           >
-            <div className="overflow-hidden rounded-[2rem] shadow-lift">
-              <ScrollFx variant="parallax" distance={26}>
-                <img
-                  src={banner?.image_url ?? heroImage}
-                  alt={banner?.title ?? "Shop your vibe — fashion, beauty and accessories"}
-                  width={1536}
-                  height={1024}
-                  className="w-full scale-110 object-cover"
-                />
-              </ScrollFx>
-            </div>
+            <HeroSlider banners={slides} fallback={heroImage} />
             <div className="absolute -bottom-4 left-4 flex items-center gap-2 rounded-2xl bg-card/95 px-3 py-2 shadow-lift backdrop-blur">
               <Icon3D name="fast-delivery" size="sm" />
               <div className="text-[11px] leading-tight">
