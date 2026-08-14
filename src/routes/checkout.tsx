@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Loader2, MapPin, Lock, Banknote, Smartphone, CreditCard, Tag, X } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +16,8 @@ import { placeOrder } from "@/lib/orders.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+
+const LAST_ADDRESS_KEY = "blush:last-address";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
