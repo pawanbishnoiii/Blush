@@ -118,8 +118,14 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-screen flex-col">
+        <a
+          href="#main-content"
+          className="skip-link rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-lift"
+        >
+          Skip to content
+        </a>
         <SiteHeader />
-        <main className="flex-1">
+        <main id="main-content" tabIndex={-1} className="flex-1">
           <Outlet />
         </main>
         <SiteFooter />

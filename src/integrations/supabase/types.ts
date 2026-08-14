@@ -160,6 +160,7 @@ export type Database = {
           image_url: string
           is_active: boolean
           link_url: string | null
+          media_type: string
           mobile_image_url: string | null
           mood_key: string | null
           placement: string
@@ -168,6 +169,7 @@ export type Database = {
           subtitle: string | null
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           created_at?: string
@@ -177,6 +179,7 @@ export type Database = {
           image_url: string
           is_active?: boolean
           link_url?: string | null
+          media_type?: string
           mobile_image_url?: string | null
           mood_key?: string | null
           placement?: string
@@ -185,6 +188,7 @@ export type Database = {
           subtitle?: string | null
           title: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           created_at?: string
@@ -194,6 +198,7 @@ export type Database = {
           image_url?: string
           is_active?: boolean
           link_url?: string | null
+          media_type?: string
           mobile_image_url?: string | null
           mood_key?: string | null
           placement?: string
@@ -202,6 +207,7 @@ export type Database = {
           subtitle?: string | null
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: []
       }

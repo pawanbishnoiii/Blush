@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Icon3D } from "@/components/site/Icon3D";
 import { allBannersQuery, type Banner } from "@/lib/queries";
+import { uploadFile } from "@/lib/upload";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/banners")({
@@ -18,6 +19,8 @@ type Draft = {
   subtitle: string;
   image_url: string;
   mobile_image_url: string;
+  media_type: "image" | "video";
+  video_url: string;
   link_url: string;
   cta_label: string;
   placement: string;
@@ -29,6 +32,8 @@ const EMPTY: Draft = {
   subtitle: "",
   image_url: "",
   mobile_image_url: "",
+  media_type: "image",
+  video_url: "",
   link_url: "",
   cta_label: "",
   placement: "hero",
@@ -40,6 +45,7 @@ function AdminBanners() {
   const banners = useQuery(allBannersQuery);
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ key: string; pct: number } | null>(null);
 
   const list = banners.data ?? [];
 
@@ -47,28 +53,28 @@ function AdminBanners() {
     await qc.invalidateQueries({ queryKey: ["banners"] });
   }
 
-  async function upload(file: File, key: "image_url" | "mobile_image_url") {
+  async function upload(file: File, key: "image_url" | "mobile_image_url" | "video_url") {
     setBusy(true);
+    setProgress({ key, pct: 0 });
     try {
-      const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, "-")}`;
-      const { error } = await supabase.storage.from("banners").upload(path, file, { upsert: true });
-      if (error) throw error;
-      const { data, error: signErr } = await supabase.storage
-        .from("banners")
-        .createSignedUrl(path, 60 * 60 * 24 * 365 * 5);
-      if (signErr || !data) throw signErr ?? new Error("Could not create image URL");
-      setDraft((d) => ({ ...d, [key]: data.signedUrl }));
-      toast.success("Image uploaded");
+      const url = await uploadFile("banners", file, (pct) => setProgress({ key, pct }));
+      setDraft((d) => ({ ...d, [key]: url }));
+      toast.success(key === "video_url" ? "Video uploaded" : "Image uploaded");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }
 
   async function create() {
     if (!draft.title.trim() || !draft.image_url.trim()) {
-      toast.error("Title and image are required");
+      toast.error("Title and image are required (the image is also the video poster)");
+      return;
+    }
+    if (draft.media_type === "video" && !draft.video_url.trim()) {
+      toast.error("Add a video file or URL, or switch this banner back to image");
       return;
     }
     setBusy(true);
@@ -77,6 +83,8 @@ function AdminBanners() {
       subtitle: draft.subtitle.trim() || null,
       image_url: draft.image_url.trim(),
       mobile_image_url: draft.mobile_image_url.trim() || null,
+      media_type: draft.media_type,
+      video_url: draft.media_type === "video" ? draft.video_url.trim() : null,
       link_url: draft.link_url.trim() || null,
       cta_label: draft.cta_label.trim() || null,
       placement: draft.placement,
@@ -135,6 +143,25 @@ function AdminBanners() {
         </div>
 
         <div className="mt-4 space-y-3">
+          <Field label="Media type">
+            <div className="flex gap-2">
+              {(["image", "video"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setDraft({ ...draft, media_type: t })}
+                  aria-pressed={draft.media_type === t}
+                  className={cn(
+                    pill,
+                    "capitalize",
+                    draft.media_type === t && "border-transparent bg-primary text-primary-foreground",
+                  )}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </Field>
           <Field label="Title">
             <input
               value={draft.title}
@@ -160,8 +187,51 @@ function AdminBanners() {
               className="w-full text-xs"
             />
           </Field>
+          <Field label="Or paste an image URL">
+            <input
+              value={draft.image_url}
+              onChange={(e) => setDraft({ ...draft, image_url: e.target.value })}
+              placeholder="https://…"
+              className={inputCls}
+            />
+          </Field>
+          {progress?.key === "image_url" && <Progress pct={progress.pct} />}
           {draft.image_url && (
             <img src={draft.image_url} alt="Banner preview" className="h-28 w-full rounded-2xl object-cover" />
+          )}
+          {draft.media_type === "video" && (
+            <>
+              <Field label="Video file (muted autoplay, banner-sized)">
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) void upload(f, "video_url");
+                  }}
+                  className="w-full text-xs"
+                />
+              </Field>
+              <Field label="Or paste a video URL">
+                <input
+                  value={draft.video_url}
+                  onChange={(e) => setDraft({ ...draft, video_url: e.target.value })}
+                  placeholder="https://…/hero.mp4"
+                  className={inputCls}
+                />
+              </Field>
+              {progress?.key === "video_url" && <Progress pct={progress.pct} />}
+              {draft.video_url && (
+                <video
+                  src={draft.video_url}
+                  muted
+                  loop
+                  playsInline
+                  autoPlay
+                  className="h-28 w-full rounded-2xl object-cover"
+                />
+              )}
+            </>
           )}
           <Field label="Mobile image (optional)">
             <input
@@ -174,6 +244,7 @@ function AdminBanners() {
               className="w-full text-xs"
             />
           </Field>
+          {progress?.key === "mobile_image_url" && <Progress pct={progress.pct} />}
           <Field label="Link URL">
             <input
               value={draft.link_url}
@@ -241,7 +312,7 @@ function AdminBanners() {
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold">{b.title}</p>
               <p className="truncate text-xs text-muted-foreground">
-                {b.placement} · order {b.sort_order}
+                {b.placement} · {b.media_type === "video" ? "video" : "image"} · order {b.sort_order}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-1.5">
@@ -285,6 +356,24 @@ function AdminBanners() {
 const inputCls =
   "w-full rounded-2xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring";
 const pill = "rounded-full border border-border px-3 py-1.5 text-[11px] font-bold";
+
+function Progress({ pct }: { pct: number }) {
+  return (
+    <div
+      role="progressbar"
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="Upload progress"
+      className="h-2 w-full overflow-hidden rounded-full bg-muted"
+    >
+      <div
+        className="h-full rounded-full bg-primary transition-[width] duration-200"
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (

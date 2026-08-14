@@ -108,9 +108,10 @@ function Onboarding() {
     if (!userId) return;
     setBusy(true);
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({
+      // Upsert so the flow works even when the profile row wasn't created yet.
+      const { error } = await supabase.from("profiles").upsert(
+        {
+          id: userId,
           display_name: name.trim(),
           gender,
           whatsapp,
@@ -119,10 +120,16 @@ function Onboarding() {
           preferred_moods: moods,
           preferred_sizes: { default: size },
           onboarded: true,
-        })
-        .eq("id", userId);
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" },
+      );
       if (error) throw error;
+      await supabase.auth.updateUser({
+        data: { full_name: name.trim(), phone: whatsapp },
+      });
       await qc.invalidateQueries({ queryKey: ["my_profile"] });
+      await qc.invalidateQueries({ queryKey: ["profile"] });
       toast.success(`You're all set, ${name.split(" ")[0]}!`);
       navigate({ to: "/", replace: true });
     } catch (err) {

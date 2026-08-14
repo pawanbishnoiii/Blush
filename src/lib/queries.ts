@@ -283,6 +283,8 @@ export type Banner = {
   subtitle: string | null;
   image_url: string;
   mobile_image_url: string | null;
+  media_type: "image" | "video";
+  video_url: string | null;
   link_url: string | null;
   cta_label: string | null;
   placement: string;

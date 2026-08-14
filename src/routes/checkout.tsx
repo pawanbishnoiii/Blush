@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Loader2, MapPin, Lock, Banknote, Smartphone, CreditCard, Tag, X } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +16,8 @@ import { placeOrder } from "@/lib/orders.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+
+const LAST_ADDRESS_KEY = "blush:last-address";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -102,6 +104,77 @@ function Checkout() {
     setValue("city", addr.city, { shouldValidate: true });
     setValue("state", addr.state, { shouldValidate: true });
     setValue("pincode", addr.pincode, { shouldValidate: true });
+  }
+
+  /** Autofill: default saved address for members, last-used address for guests. */
+  const prefilled = useRef(false);
+  useEffect(() => {
+    if (prefilled.current) return;
+    const saved = (addresses.data as SavedAddress[] | undefined) ?? [];
+    if (user && saved.length) {
+      const preferred = saved.find((a) => a.is_default) ?? saved[0]!;
+      setSelectedAddressId(preferred.id);
+      applyAddress(preferred);
+      if (user.email) setValue("email", user.email, { shouldValidate: true });
+      prefilled.current = true;
+      return;
+    }
+    try {
+      const raw = window.localStorage.getItem(LAST_ADDRESS_KEY);
+      if (raw) {
+        const last = JSON.parse(raw) as Partial<FormValues>;
+        (Object.keys(last) as (keyof FormValues)[]).forEach((k) => {
+          const v = last[k];
+          if (typeof v === "string" && v) setValue(k, v as never, { shouldValidate: true });
+        });
+        prefilled.current = true;
+      }
+    } catch {
+      // ignore malformed storage
+    }
+    if (user?.email) setValue("email", user.email, { shouldValidate: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addresses.data, user]);
+
+  /** Remember the address for next time (locally always, in the account when signed in). */
+  async function rememberAddress(values: FormValues) {
+    try {
+      window.localStorage.setItem(
+        LAST_ADDRESS_KEY,
+        JSON.stringify({
+          fullName: values.fullName,
+          email: values.email,
+          phone: values.phone,
+          addressLine1: values.addressLine1,
+          addressLine2: values.addressLine2 ?? "",
+          city: values.city,
+          state: values.state,
+          pincode: values.pincode,
+        }),
+      );
+    } catch {
+      // ignore quota / privacy errors
+    }
+    if (!user) return;
+    const saved = (addresses.data as SavedAddress[] | undefined) ?? [];
+    const duplicate = saved.some(
+      (a) =>
+        a.address_line1.trim().toLowerCase() === values.addressLine1.trim().toLowerCase() &&
+        a.pincode === values.pincode,
+    );
+    if (duplicate) return;
+    await supabase.from("addresses").insert({
+      user_id: user.id,
+      label: saved.length === 0 ? "Home" : "Other",
+      full_name: values.fullName,
+      phone: values.phone,
+      address_line1: values.addressLine1,
+      address_line2: values.addressLine2 ?? null,
+      city: values.city,
+      state: values.state,
+      pincode: values.pincode,
+      is_default: saved.length === 0,
+    });
   }
 
   async function applyCoupon() {
@@ -200,6 +273,7 @@ function Checkout() {
           ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
         },
       });
+      await rememberAddress(values);
       clear();
       navigate({ to: "/order/$code", params: { code: result.orderCode } });
     } catch (err) {
