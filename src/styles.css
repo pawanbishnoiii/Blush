@@ -375,3 +375,58 @@
 @utility animate-bag-bounce { animation: bag-bounce 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
 @utility animate-float-soft { animation: float-soft 5s ease-in-out infinite; }
 @utility animate-truck-roll { animation: truck-roll 3.2s ease-in-out infinite; }
+
+/* ---------- Accessibility & motion policy ---------- */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+/* Anything that can receive focus gets a visible, high-contrast ring. */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 0.75rem;
+}
+
+/* Skip to content link — visible only when focused via keyboard. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 200;
+  transform: translateY(-200%);
+  transition: transform 0.18s ease-out;
+}
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Comfortable tap targets on touch devices. */
+@media (pointer: coarse) {
+  a,
+  button,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-float-soft,
+  .animate-truck-roll {
+    animation: none !important;
+  }
+}
