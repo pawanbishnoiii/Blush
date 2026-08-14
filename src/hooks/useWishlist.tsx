@@ -49,12 +49,15 @@ export function useWishlist() {
     }
     merged.current = true;
     void (async () => {
-      await supabase
+      const { data: existing } = await supabase
         .from("wishlist")
-        .upsert(
-          pending.map((product_id) => ({ product_id, user_id: user.id })),
-          { onConflict: "user_id,product_id", ignoreDuplicates: true },
-        );
+        .select("product_id")
+        .eq("user_id", user.id);
+      const have = new Set((existing ?? []).map((r) => r.product_id));
+      const rows = pending
+        .filter((id) => !have.has(id))
+        .map((product_id) => ({ product_id, user_id: user.id }));
+      if (rows.length) await supabase.from("wishlist").insert(rows);
       writeGuest([]);
       setGuestIds([]);
       await qc.invalidateQueries({ queryKey: ["wishlist"] });
