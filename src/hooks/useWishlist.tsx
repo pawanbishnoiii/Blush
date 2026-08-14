@@ -1,18 +1,78 @@
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { wishlistQuery } from "@/lib/queries";
 import { useAuth } from "@/hooks/useAuth";
 
+const GUEST_KEY = "blush:wishlist";
+
+function readGuest(): string[] {
+  try {
+    const raw = window.localStorage.getItem(GUEST_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeGuest(ids: string[]) {
+  try {
+    window.localStorage.setItem(GUEST_KEY, JSON.stringify(ids));
+  } catch {
+    // ignore quota / privacy errors
+  }
+}
+
+/**
+ * Wishlist that works signed out (localStorage) and signed in (synced to the
+ * account). Guest saves merge into the account on the first signed-in read.
+ */
 export function useWishlist() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const list = useQuery({ ...wishlistQuery, enabled: Boolean(user) });
-  const ids = new Set(list.data ?? []);
+  const [guestIds, setGuestIds] = useState<string[]>([]);
+  const merged = useRef(false);
+
+  useEffect(() => {
+    setGuestIds(readGuest());
+  }, []);
+
+  // Merge guest saves into the account once, right after sign-in.
+  useEffect(() => {
+    if (!user || merged.current) return;
+    const pending = readGuest();
+    if (pending.length === 0) {
+      merged.current = true;
+      return;
+    }
+    merged.current = true;
+    void (async () => {
+      await supabase
+        .from("wishlist")
+        .upsert(
+          pending.map((product_id) => ({ product_id, user_id: user.id })),
+          { onConflict: "user_id,product_id", ignoreDuplicates: true },
+        );
+      writeGuest([]);
+      setGuestIds([]);
+      await qc.invalidateQueries({ queryKey: ["wishlist"] });
+    })();
+  }, [user, qc]);
+
+  const ids = new Set(user ? (list.data ?? []) : guestIds);
 
   const toggle = useMutation({
     mutationFn: async (productId: string) => {
-      if (!user) throw new Error("SIGN_IN");
+      if (!user) {
+        const next = ids.has(productId)
+          ? guestIds.filter((id) => id !== productId)
+          : [...guestIds, productId];
+        writeGuest(next);
+        setGuestIds(next);
+        return next.includes(productId);
+      }
       if (ids.has(productId)) {
         const { error } = await supabase
           .from("wishlist")
@@ -30,10 +90,12 @@ export function useWishlist() {
     },
     onSuccess: (added) => {
       qc.invalidateQueries({ queryKey: ["wishlist"] });
-      toast.success(added ? "Saved to wishlist" : "Removed from wishlist");
+      toast.success(added ? "Saved to wishlist" : "Removed from wishlist", {
+        description: user ? undefined : "Sign in to sync it across devices.",
+      });
     },
     onError: (e: Error) => {
-      toast.error(e.message === "SIGN_IN" ? "Sign in to save favourites" : e.message);
+      toast.error(e.message);
     },
   });
 
