@@ -89,7 +89,10 @@ function TrackPage() {
   return (
     <div className="mx-auto w-full max-w-[860px] px-5 pb-28 pt-8 sm:px-8 md:pb-16">
       <div className="flex items-center gap-4">
-        <Icon3D name="track-order" size="xl" float />
+        <span className="relative grid shrink-0 place-items-center">
+          <LottieFx name="pulse" className="absolute inset-0 -z-10 h-full w-full opacity-70" />
+          <Icon3D name="track-order" size="xl" float />
+        </span>
         <div className="min-w-0">
           <p className="eyebrow text-primary">Tracking</p>
           <h1 className="truncate font-display text-2xl font-extrabold tracking-tight">
