@@ -103,6 +103,9 @@ function AdminProducts() {
   const [q, setQ] = useState("");
   const [filterCat, setFilterCat] = useState("");
   const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState<SectionKey>("basics");
+
+  const kind = productKind(draft?.category_slug ?? draft?.gender ?? "");
 
   const brandName = (id: string | null | undefined) =>
     (brands.data ?? []).find((b) => b.id === id)?.name ?? "No brand";
