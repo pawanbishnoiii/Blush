@@ -92,6 +92,24 @@ const EMPTY: Draft = {
   seo_description: "",
 };
 
+type SectionKey = "basics" | "pricing" | "content" | "media" | "variants";
+
+const SECTIONS: { key: SectionKey; label: string }[] = [
+  { key: "basics", label: "Basics" },
+  { key: "pricing", label: "Pricing & policy" },
+  { key: "content", label: "Content & SEO" },
+  { key: "media", label: "Images" },
+  { key: "variants", label: "Colours, sizes & stock" },
+];
+
+/** Category-aware field set: fashion, beauty or accessory. */
+function productKind(slug: string): "fashion" | "beauty" | "accessory" {
+  const s = slug.toLowerCase();
+  if (/(beauty|makeup|skin|hair|nail|fragrance|bath|body|wellness)/.test(s)) return "beauty";
+  if (/(bag|jewel|accessor|watch|footwear|shoe|sunglass|belt)/.test(s)) return "accessory";
+  return "fashion";
+}
+
 function AdminProducts() {
   const qc = useQueryClient();
   const products = useQuery(allProductsQuery);
