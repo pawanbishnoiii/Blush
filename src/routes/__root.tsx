@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
+import { BottomNav } from "@/components/site/BottomNav";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -117,7 +118,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-screen flex-col overflow-x-hidden pb-20 md:pb-0">
         <a
           href="#main-content"
           className="skip-link rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-lift"
@@ -130,6 +131,7 @@ function RootComponent() {
         </main>
         <SiteFooter />
       </div>
+      <BottomNav />
       <Toaster position="top-center" />
     </QueryClientProvider>
   );
