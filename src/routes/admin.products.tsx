@@ -137,6 +137,7 @@ function AdminProducts() {
   }, [products.data, q, filterCat]);
 
   function edit(p: Product) {
+    setTab("basics");
     setDraft({
       id: p.id,
       slug: p.slug,
@@ -258,7 +259,7 @@ function AdminProducts() {
         </select>
         <button
           type="button"
-          onClick={() => setDraft({ ...EMPTY })}
+          onClick={() => { setTab("basics"); setDraft({ ...EMPTY }); }}
           className="shrink-0 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground"
         >
           New product
