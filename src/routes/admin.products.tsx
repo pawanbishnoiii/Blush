@@ -246,11 +246,32 @@ function AdminProducts() {
 
       {draft && (
         <div className="mt-5 rounded-3xl border border-border bg-card p-5 shadow-lift">
-          <h2 className="font-display text-base font-extrabold">
-            {draft.id ? "Edit product" : "New product"}
-          </h2>
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <h2 className="truncate font-display text-base font-extrabold">
+              {draft.id ? `Edit — ${draft.name || "product"}` : "New product"}
+            </h2>
+            <span className="shrink-0 rounded-full bg-surface px-3 py-1 text-[11px] font-bold capitalize text-muted-foreground">
+              {kind} setup
+            </span>
+          </div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-4 flex flex-wrap gap-2">
+            {SECTIONS.map((s) => (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setTab(s.key)}
+                className={cn(
+                  "rounded-full px-3.5 py-1.5 text-[11px] font-bold transition-colors",
+                  tab === s.key ? "bg-primary text-primary-foreground" : "bg-surface",
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+
+          <div className={cn("mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3", tab !== "basics" && "hidden")}>
             <Field label="Name" value={draft.name} onChange={(v) => setDraft({ ...draft, name: v })} />
             <Field label="Slug" value={draft.slug} onChange={(v) => setDraft({ ...draft, slug: v })} placeholder="auto from name" />
             <Field label="Tagline" value={draft.tagline} onChange={(v) => setDraft({ ...draft, tagline: v })} />
@@ -272,25 +293,46 @@ function AdminProducts() {
               onChange={(v) => setDraft({ ...draft, gender: v })}
               options={["women", "men", "unisex", "kids"].map((g) => ({ value: g, label: g }))}
             />
+            <Field label="Badge" value={draft.badge} onChange={(v) => setDraft({ ...draft, badge: v })} />
+            <Field label="Weight (grams)" value={draft.weight_grams ? String(draft.weight_grams) : ""} onChange={(v) => setDraft({ ...draft, weight_grams: v ? Number(v.replace(/\D/g, "")) : null })} />
+            {kind === "fashion" && (
+              <>
+                <Field label="Fabric / material" value={draft.fabric} onChange={(v) => setDraft({ ...draft, fabric: v })} />
+                <Field label="Fit" value={draft.fit} onChange={(v) => setDraft({ ...draft, fit: v })} />
+                <Field label="Wash care" value={draft.care} onChange={(v) => setDraft({ ...draft, care: v })} />
+              </>
+            )}
+            {kind === "beauty" && (
+              <>
+                <Field label="Key ingredients" value={draft.fabric} onChange={(v) => setDraft({ ...draft, fabric: v })} placeholder="Niacinamide, Vitamin C" />
+                <Field label="Skin / hair type" value={draft.fit} onChange={(v) => setDraft({ ...draft, fit: v })} placeholder="All skin types" />
+                <Field label="How to use" value={draft.care} onChange={(v) => setDraft({ ...draft, care: v })} />
+              </>
+            )}
+            {kind === "accessory" && (
+              <>
+                <Field label="Material" value={draft.fabric} onChange={(v) => setDraft({ ...draft, fabric: v })} placeholder="Gold-plated brass" />
+                <Field label="Dimensions" value={draft.fit} onChange={(v) => setDraft({ ...draft, fit: v })} placeholder="24cm x 12cm" />
+                <Field label="Care" value={draft.care} onChange={(v) => setDraft({ ...draft, care: v })} />
+              </>
+            )}
+          </div>
+
+          <div className={cn("mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3", tab !== "pricing" && "hidden")}>
             <Field label="Price (₹)" value={String(draft.price_inr)} onChange={(v) => setDraft({ ...draft, price_inr: Number(v.replace(/\D/g, "")) || 0 })} />
             <Field label="MRP / compare at (₹)" value={draft.compare_at_inr ? String(draft.compare_at_inr) : ""} onChange={(v) => setDraft({ ...draft, compare_at_inr: v ? Number(v.replace(/\D/g, "")) : null })} />
-            <Field label="Weight (grams)" value={draft.weight_grams ? String(draft.weight_grams) : ""} onChange={(v) => setDraft({ ...draft, weight_grams: v ? Number(v.replace(/\D/g, "")) : null })} />
-            <Field label="Badge" value={draft.badge} onChange={(v) => setDraft({ ...draft, badge: v })} />
-            <Field label="Fabric / material" value={draft.fabric} onChange={(v) => setDraft({ ...draft, fabric: v })} />
-            <Field label="Fit" value={draft.fit} onChange={(v) => setDraft({ ...draft, fit: v })} />
-            <Field label="Care" value={draft.care} onChange={(v) => setDraft({ ...draft, care: v })} />
+            <Field label="Return window (days)" value={String(draft.return_days)} onChange={(v) => setDraft({ ...draft, return_days: Number(v.replace(/\D/g, "")) || 0 })} />
+          </div>
+
+          <div className={cn("mt-3 grid gap-3 lg:grid-cols-2", tab !== "content" && "hidden")}>
+            <Area label="Description" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} />
+            <Area label="About this product" value={draft.about} onChange={(v) => setDraft({ ...draft, about: v })} />
             <Field label="SEO title" value={draft.seo_title} onChange={(v) => setDraft({ ...draft, seo_title: v })} />
             <Field label="SEO description" value={draft.seo_description} onChange={(v) => setDraft({ ...draft, seo_description: v })} />
           </div>
 
-          <div className="mt-3 grid gap-3 lg:grid-cols-2">
-            <Area label="Description" value={draft.description} onChange={(v) => setDraft({ ...draft, description: v })} />
-            <Area label="About this product" value={draft.about} onChange={(v) => setDraft({ ...draft, about: v })} />
-          </div>
-
-          <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_200px_auto]">
+          <div className={cn("mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_200px_auto]", tab !== "pricing" && "hidden")}>
             <Area label="Refund / return policy" value={draft.refund_policy} onChange={(v) => setDraft({ ...draft, refund_policy: v })} rows={2} />
-            <Field label="Return window (days)" value={String(draft.return_days)} onChange={(v) => setDraft({ ...draft, return_days: Number(v.replace(/\D/g, "")) || 0 })} />
             <div className="flex items-end gap-2 pb-1">
               <Toggle label={draft.is_returnable ? "Returnable" : "Final sale"} checked={draft.is_returnable} onChange={(v) => setDraft({ ...draft, is_returnable: v })} />
               <button
@@ -303,7 +345,7 @@ function AdminProducts() {
             </div>
           </div>
 
-          <div className="mt-4">
+          <div className={cn("mt-4", tab !== "media" && "hidden")}>
             <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-muted-foreground">Main image</p>
             <div className="flex items-start gap-3">
               {draft.image_key && (
@@ -320,16 +362,18 @@ function AdminProducts() {
             </div>
           </div>
 
-          <TagPicker label="Moods" options={MOODS.map((m) => m.key)} value={draft.mood_tags} onChange={(v) => setDraft({ ...draft, mood_tags: v })} />
-          <TagPicker label="Vibes" options={VIBES.map((v) => v.key)} value={draft.vibe_tags} onChange={(v) => setDraft({ ...draft, vibe_tags: v })} />
-          <TagPicker label="Occasions" options={["college", "office", "party", "festive", "travel", "self-care"]} value={draft.occasion_tags} onChange={(v) => setDraft({ ...draft, occasion_tags: v })} />
+          <div className={cn(tab !== "content" && "hidden")}>
+            <TagPicker label="Moods" options={MOODS.map((m) => m.key)} value={draft.mood_tags} onChange={(v) => setDraft({ ...draft, mood_tags: v })} />
+            <TagPicker label="Vibes" options={VIBES.map((v) => v.key)} value={draft.vibe_tags} onChange={(v) => setDraft({ ...draft, vibe_tags: v })} />
+            <TagPicker label="Occasions" options={["college", "office", "party", "festive", "travel", "self-care"]} value={draft.occasion_tags} onChange={(v) => setDraft({ ...draft, occasion_tags: v })} />
+          </div>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <Toggle label="Featured" checked={draft.is_featured} onChange={(v) => setDraft({ ...draft, is_featured: v })} />
             <Toggle label={draft.is_published ? "Published" : "Draft"} checked={draft.is_published} onChange={(v) => setDraft({ ...draft, is_published: v })} />
           </div>
 
-          <div className="mt-5 flex gap-3">
+          <div className="sticky bottom-4 z-10 mt-5 flex gap-3 rounded-full border border-border bg-card/95 p-2 shadow-lift backdrop-blur">
             <button type="button" onClick={save} disabled={saving} className="rounded-full bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-60">
               {saving ? "Saving…" : "Save product"}
             </button>
@@ -338,13 +382,17 @@ function AdminProducts() {
             </button>
           </div>
 
-          {draft.id && (
+          {draft.id && tab === "media" && (
             <>
               <GalleryManager
                 productId={draft.id}
                 rows={images.data?.[draft.id] ?? []}
                 variants={(variants.data ?? []).filter((v) => v.product_id === draft.id)}
               />
+            </>
+          )}
+          {draft.id && tab === "variants" && (
+            <>
               <VariantManager
                 productId={draft.id}
                 rows={(variants.data ?? []).filter((v) => v.product_id === draft.id)}
@@ -352,7 +400,7 @@ function AdminProducts() {
               />
             </>
           )}
-          {!draft.id && (
+          {!draft.id && (tab === "media" || tab === "variants") && (
             <p className="mt-6 rounded-2xl bg-surface p-3 text-xs text-muted-foreground">
               Save the product first to add colour galleries, sizes and stock.
             </p>
