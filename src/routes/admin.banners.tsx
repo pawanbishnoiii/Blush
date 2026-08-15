@@ -138,7 +138,7 @@ function AdminBanners() {
     <div className="grid gap-6 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)]">
       <section className="rounded-3xl border border-border bg-card p-5 shadow-soft">
         <div className="flex items-center gap-2">
-          <Icon3D name="collections" size="md" />
+          <Icon3D name="lookbook" size="md" />
           <h2 className="font-display text-base font-extrabold">New banner</h2>
         </div>
 
@@ -344,7 +344,7 @@ function AdminBanners() {
         ))}
         {!banners.isLoading && list.length === 0 && (
           <div className="rounded-3xl border border-border bg-card p-8 text-center">
-            <Icon3D name="collections" size="2xl" className="mx-auto" />
+            <Icon3D name="lookbook" size="2xl" className="mx-auto" />
             <p className="mt-3 text-sm text-muted-foreground">No banners yet — create your first one.</p>
           </div>
         )}

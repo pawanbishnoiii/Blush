@@ -54,7 +54,7 @@ function OrdersPage() {
   return (
     <div className="mx-auto w-full max-w-[1000px] px-5 pb-28 pt-8 sm:px-8 md:pb-16">
       <div className="flex items-center gap-4">
-        <Icon3D name="my-orders" size="xl" float />
+        <Icon3D name="order-history" size="xl" float />
         <div>
           <h1 className="font-display text-3xl font-extrabold tracking-tight">My orders</h1>
           <p className="text-sm text-muted-foreground">{(orders.data ?? []).length} total orders</p>
@@ -124,7 +124,7 @@ function OrdersPage() {
 
         {list.length === 0 && (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <Icon3D name="my-orders" size="2xl" float />
+            <Icon3D name="order-history" size="2xl" float />
             <p className="font-display text-lg font-bold">No orders here yet</p>
             <Link
               to="/shop"

@@ -48,7 +48,7 @@ function AdminLayout() {
   if (user && !isAdmin) {
     return (
       <div className="flex flex-col items-center gap-3 px-5 py-24 text-center">
-        <Icon3D name="secure-payment" size="2xl" />
+        <Icon3D name="safety-security" size="2xl" />
         <p className="font-display text-xl font-bold">Admins only</p>
         <p className="max-w-sm text-sm text-muted-foreground">
           This area is restricted. Ask an owner to grant your account the admin role.
@@ -63,7 +63,7 @@ function AdminLayout() {
   return (
     <div className="mx-auto w-full max-w-[1500px] px-4 pb-28 pt-6 sm:px-8 md:pb-12">
       <div className="flex items-center gap-3">
-        <Icon3D name="store" size="lg" float />
+        <Icon3D name="brand-store" size="lg" float />
         <div className="min-w-0">
           <h1 className="font-display text-2xl font-extrabold tracking-tight">Control center</h1>
           <p className="text-xs text-muted-foreground">Everything you need to run the store</p>

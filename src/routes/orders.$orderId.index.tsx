@@ -79,7 +79,7 @@ function OrderDetail() {
   if (!o) {
     return (
       <div className="flex flex-col items-center gap-3 px-5 py-24 text-center">
-        <Icon3D name="search" size="2xl" />
+        <Icon3D name="order-history" size="2xl" />
         <p className="font-display text-lg font-bold">Order not found</p>
         <Link to="/orders" className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">
           Back to orders

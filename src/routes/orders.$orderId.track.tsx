@@ -62,7 +62,7 @@ function TrackPage() {
   if (!o) {
     return (
       <div className="flex flex-col items-center gap-3 px-5 py-24 text-center">
-        <Icon3D name="search" size="2xl" />
+        <Icon3D name="track-order" size="2xl" />
         <p className="font-display text-lg font-bold">Order not found</p>
         <Link to="/orders" className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">
           Back to orders
@@ -89,7 +89,7 @@ function TrackPage() {
   return (
     <div className="mx-auto w-full max-w-[860px] px-5 pb-28 pt-8 sm:px-8 md:pb-16">
       <div className="flex items-center gap-4">
-        <Icon3D name="fast-delivery" size="xl" float />
+        <Icon3D name="track-order" size="xl" float />
         <div className="min-w-0">
           <p className="eyebrow text-primary">Tracking</p>
           <h1 className="truncate font-display text-2xl font-extrabold tracking-tight">
