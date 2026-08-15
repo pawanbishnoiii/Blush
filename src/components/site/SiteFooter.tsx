@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { Instagram, Mail, Phone } from "lucide-react";
+import { ScrollFx } from "@/components/site/ScrollFx";
 
 export function SiteFooter() {
   return (
     <footer className="mt-24 border-t border-border bg-surface">
-      <div className="mx-auto w-full max-w-[1400px] px-5 py-14 sm:px-8">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <div className="mx-auto w-full max-w-[1400px] overflow-x-hidden px-5 py-14 sm:px-8">
+        <ScrollFx variant="stagger" className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div className="min-w-0">
             <span className="font-display text-2xl font-extrabold tracking-[-0.06em]">ESKO</span>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-muted-foreground">
@@ -60,12 +61,16 @@ export function SiteFooter() {
               <Instagram className="h-3.5 w-3.5" /> @esko.in
             </a>
           </FooterCol>
-        </div>
+        </ScrollFx>
 
-        <div className="mt-12 flex flex-col gap-2 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <ScrollFx
+          variant="fade-up"
+          delay={0.1}
+          className="mt-12 flex flex-col gap-2 border-t border-border pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
+        >
           <p>© {new Date().getFullYear()} Esko Apparel Pvt. Ltd. Bengaluru, India.</p>
           <p>GST 29AAECE1234F1Z5 · Prices include all taxes</p>
-        </div>
+        </ScrollFx>
       </div>
     </footer>
   );
@@ -73,9 +78,9 @@ export function SiteFooter() {
 
 function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="min-w-0">
+    <div className="min-w-0 transition-transform duration-300 hover:-translate-y-0.5">
       <p className="eyebrow text-muted-foreground">{title}</p>
-      <div className="mt-4 flex flex-col gap-2.5 text-sm [&_.footer-link]:text-foreground/80 [&_.footer-link]:transition-colors hover:[&_.footer-link]:text-accent">
+      <div className="mt-4 flex flex-col gap-2.5 text-sm [&_.footer-link]:inline-block [&_.footer-link]:text-foreground/80 [&_.footer-link]:transition-all [&_.footer-link]:duration-200 [&_.footer-link:hover]:translate-x-1 [&_.footer-link:hover]:text-accent">
         {children}
       </div>
     </div>

@@ -114,7 +114,7 @@ function AdminReviews() {
         ))}
         {!reviews.isLoading && list.length === 0 && (
           <div className="rounded-3xl border border-border bg-card p-8 text-center">
-            <Icon3D name="camera-review" size="2xl" className="mx-auto" />
+            <Icon3D name="rate-your-experience" size="2xl" className="mx-auto" />
             <p className="mt-3 text-sm text-muted-foreground">Nothing in this queue.</p>
           </div>
         )}

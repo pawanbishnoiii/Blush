@@ -41,7 +41,7 @@ export function SiteHeader() {
       <div className="mx-auto grid w-full max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3 sm:px-8">
         <div className="flex min-w-0 items-center gap-6">
           <Link to="/" className="flex shrink-0 items-center gap-2">
-            <Icon3D name="store" size="sm" />
+            <Icon3D name="brand-store" size="sm" />
             <span
               className="font-display text-xl font-extrabold tracking-[-0.04em]"
               style={{
@@ -93,14 +93,14 @@ export function SiteHeader() {
             aria-label="Track orders"
             className="hidden h-10 w-10 items-center justify-center rounded-full transition-transform active:scale-95 sm:inline-flex"
           >
-            <Icon3D name="fast-delivery" size="xs" />
+            <Icon3D name="track-order" size="xs" />
           </Link>
           <Link
             to="/cart"
             aria-label={`Bag, ${count} items`}
             className="relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-transform active:scale-95"
           >
-            <Icon3D name="my-orders" size="xs" />
+            <Icon3D name="my-purchases" size="xs" />
             <AnimatePresence>
               {count > 0 && (
                 <motion.span

@@ -237,7 +237,7 @@ function ProductPage() {
   if (!product) {
     return (
       <div className="mx-auto max-w-md px-5 py-28 text-center">
-        <Icon3D name="search" size="2xl" />
+        <Icon3D name="browse-categories" size="2xl" />
         <h1 className="section-type mt-6">We couldn&apos;t find that piece.</h1>
         <Link
           to="/shop"

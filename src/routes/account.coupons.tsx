@@ -32,7 +32,7 @@ function CouponsPage() {
   return (
     <div className="mx-auto w-full max-w-[800px] px-5 pb-24 pt-8 sm:px-8">
       <div className="flex items-center gap-4">
-        <Icon3D name="coupons" size="xl" float />
+        <Icon3D name="promo-code" size="xl" float />
         <div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight">Coupons</h1>
           <p className="text-sm text-muted-foreground">{(coupons.data ?? []).length} active offers</p>

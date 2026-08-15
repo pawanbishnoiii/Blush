@@ -148,7 +148,7 @@ function AccountPage() {
           to="/admin"
           className="mt-4 flex items-center gap-3 rounded-3xl border border-border bg-card p-4 shadow-soft"
         >
-          <Icon3D name="store" size="md" />
+          <Icon3D name="brand-store" size="md" />
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold">Admin control center</p>
             <p className="text-xs text-muted-foreground">Products, orders, banners, shipping</p>
@@ -250,7 +250,7 @@ function AccountPage() {
               params={{ orderId: o.id }}
               className="flex items-center gap-3 rounded-3xl border border-border bg-card p-4 shadow-soft"
             >
-              <Icon3D name="my-orders" size="md" />
+              <Icon3D name="order-history" size="md" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{o.order_code}</p>
                 <p className="text-xs capitalize text-muted-foreground">

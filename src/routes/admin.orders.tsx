@@ -98,7 +98,7 @@ function AdminOrders() {
                 onClick={() => setOpenId(open ? null : o.id)}
                 className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 text-left"
               >
-                <Icon3D name="my-orders" size="sm" className="shrink-0" />
+                <Icon3D name="order-history" size="sm" className="shrink-0" />
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold">{o.order_code}</p>
                   <p className="truncate text-xs capitalize text-muted-foreground">

@@ -95,7 +95,7 @@ function AuthPage() {
 
         {sent ? (
           <div className="mt-8 rounded-2xl bg-surface p-5 text-center">
-            <Icon3D name="messages" size="xl" className="mx-auto" />
+            <Icon3D name="live-chat" size="xl" className="mx-auto" />
             <p className="mt-3 font-semibold">Check your email</p>
             <p className="mt-1 text-sm text-muted-foreground">
               We sent a confirmation link to {email}. Click it to finish signing up.

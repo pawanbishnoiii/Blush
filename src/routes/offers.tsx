@@ -44,7 +44,7 @@ function OffersPage() {
   return (
     <div className="mx-auto w-full max-w-[1400px] px-5 pb-24 pt-8 sm:px-8 md:pb-16">
       <div className="flex items-center gap-4">
-        <Icon3D name="offers" size="xl" float />
+        <Icon3D name="deals-of-the-day" size="xl" float />
         <div className="min-w-0">
           <h1 className="font-display text-3xl font-extrabold tracking-tight">Offers</h1>
           <p className="text-sm text-muted-foreground">Coupons, price drops and budget edits</p>
@@ -68,7 +68,7 @@ function OffersPage() {
             key={c.id}
             className="flex min-w-0 items-center gap-4 rounded-3xl border border-dashed border-primary/40 bg-card p-5 shadow-soft"
           >
-            <Icon3D name="coupons" size="lg" />
+            <Icon3D name="promo-code" size="lg" />
             <div className="min-w-0 flex-1">
               <p className="font-display text-base font-extrabold">{c.title}</p>
               <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{c.description}</p>

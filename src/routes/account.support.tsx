@@ -28,7 +28,7 @@ function SupportPage() {
   return (
     <div className="mx-auto w-full max-w-[800px] px-5 pb-24 pt-8 sm:px-8">
       <div className="flex items-center gap-4">
-        <Icon3D name="support" size="xl" float />
+        <Icon3D name="help-center" size="xl" float />
         <div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight">Support</h1>
           <p className="text-sm text-muted-foreground">We usually reply within a few hours</p>
