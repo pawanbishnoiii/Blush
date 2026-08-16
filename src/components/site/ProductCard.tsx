@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Heart } from "lucide-react";
 import { discountPct, imageFor, imagePlaceholder, inr, type Product, type ProductImage } from "@/lib/catalog";
-import { Stars } from "@/components/site/Stars";
 import { useWishlist } from "@/hooks/useWishlist";
 import { cn } from "@/lib/utils";
 
