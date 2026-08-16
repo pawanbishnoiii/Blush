@@ -78,7 +78,7 @@ export function SiteHeader() {
           role="search"
           onSubmit={(e) => {
             e.preventDefault();
-            void navigate({ to: "/search", search: q.trim() ? { q: q.trim() } : undefined });
+            void navigate({ to: "/search", search: { q: q.trim() } });
           }}
           className="flex min-w-0 flex-1 items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5"
         >
@@ -158,7 +158,7 @@ export function SiteHeader() {
             role="search"
             onSubmit={(e) => {
               e.preventDefault();
-              void navigate({ to: "/search", search: q.trim() ? { q: q.trim() } : undefined });
+              void navigate({ to: "/search", search: { q: q.trim() } });
             }}
             className="flex w-full max-w-md items-center gap-2 rounded-full border border-border bg-card px-4 py-2"
           >

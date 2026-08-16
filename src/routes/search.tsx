@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search as SearchIcon, X, Clock, TrendingUp } from "lucide-react";
 import { Icon3D, Icon3DTile } from "@/components/site/Icon3D";
 import { ProductCard } from "@/components/site/ProductCard";
@@ -14,7 +14,7 @@ const TRENDING = ["cute top", "lip gloss", "tote bag", "kurti", "perfume"];
 
 export const Route = createFileRoute("/search")({
   validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search.q === "string" ? search.q : undefined,
+    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
   }),
   head: () => ({
     meta: [
