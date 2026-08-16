@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Heart } from "lucide-react";
 import { discountPct, imageFor, imagePlaceholder, inr, type Product, type ProductImage } from "@/lib/catalog";
-import { Stars } from "@/components/site/Stars";
 import { useWishlist } from "@/hooks/useWishlist";
 import { cn } from "@/lib/utils";
 
@@ -36,7 +35,7 @@ export function ProductCard({
         params={{ slug: product.slug }}
         className="block focus-visible:outline-none"
       >
-        <div className="relative overflow-hidden rounded-3xl bg-surface shadow-soft">
+        <div className="relative w-full max-w-full overflow-hidden rounded-2xl bg-surface shadow-soft">
           <img
             src={primary}
             alt={`${product.name} — ${product.tagline}`}
@@ -44,7 +43,7 @@ export function ProductCard({
             width={900}
             height={1200}
             className={cn(
-              "aspect-[4/5] w-full object-cover transition-all duration-700 ease-out",
+              "aspect-[4/5] h-auto w-full max-w-full object-cover transition-all duration-700 ease-out",
               secondary ? "group-hover:opacity-0" : "group-hover:scale-[1.045]",
             )}
           />
@@ -90,16 +89,21 @@ export function ProductCard({
           {!compact && (
             <p className="line-clamp-1 text-xs text-muted-foreground sm:text-sm">{product.tagline}</p>
           )}
-          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
             <span className="num-strong text-[16px]">{inr(product.price_inr)}</span>
             {product.compare_at_inr && (
               <span className="text-xs text-muted-foreground line-through">
                 {inr(product.compare_at_inr)}
               </span>
             )}
+            {discount > 0 && (
+              <span className="text-xs font-bold text-success">{discount}% off</span>
+            )}
           </div>
           <div className="flex items-center gap-1.5">
-            <Stars rating={product.rating} />
+            <span className="inline-flex items-center gap-1 rounded-md bg-success/10 px-1.5 py-0.5 text-[11px] font-bold text-success">
+              {Number(product.rating).toFixed(1)} ★
+            </span>
             <span className="text-[11px] text-muted-foreground">({product.review_count})</span>
           </div>
         </div>

@@ -3,52 +3,47 @@ import { Icon3D } from "@/components/site/Icon3D";
 import { AnimatedTabBar } from "@/components/ui/animated-tab-bar";
 import { cartCount, useCart } from "@/lib/cart-store";
 import { useWishlist } from "@/hooks/useWishlist";
+import { useAuth } from "@/hooks/useAuth";
 import type { Icon3DName } from "@/lib/icons3d";
 
 type Item = {
   to: string;
   label: string;
   icon: Icon3DName;
-  color: string;
   match: (p: string) => boolean;
 };
 
 const ITEMS: Item[] = [
-  { to: "/", label: "Home", icon: "brand-store", color: "var(--primary)", match: (p) => p === "/" },
+  { to: "/", label: "Home", icon: "brand-store", match: (p) => p === "/" },
   {
     to: "/shop",
-    label: "Shop",
+    label: "Categories",
     icon: "browse-categories",
-    color: "var(--secondary)",
     match: (p) => p.startsWith("/shop") || p.startsWith("/product") || p.startsWith("/category"),
   },
   {
     to: "/offers",
     label: "Offers",
-    icon: "hot-deals",
-    color: "var(--accent)",
+    icon: "offers",
     match: (p) => p.startsWith("/offers") || p.startsWith("/search"),
   },
   {
     to: "/wishlist",
-    label: "Loved",
+    label: "Wishlist",
     icon: "wishlist",
-    color: "var(--primary)",
     match: (p) => p.startsWith("/wishlist"),
   },
   {
     to: "/cart",
-    label: "Bag",
+    label: "Cart",
     icon: "my-purchases",
-    color: "var(--secondary)",
     match: (p) => p.startsWith("/cart") || p.startsWith("/checkout"),
   },
   {
     to: "/account",
-    label: "You",
+    label: "Account",
     icon: "profile",
-    color: "var(--accent)",
-    match: (p) => p.startsWith("/account") || p.startsWith("/orders"),
+    match: (p) => p.startsWith("/account") || p.startsWith("/orders") || p.startsWith("/auth"),
   },
 ];
 
@@ -58,6 +53,7 @@ export function BottomNav() {
   const lines = useCart((s) => s.lines);
   const count = cartCount(lines);
   const { ids } = useWishlist();
+  const { user } = useAuth();
 
   const activeIndex = Math.max(
     0,
@@ -73,11 +69,16 @@ export function BottomNav() {
         activeIndex={activeIndex}
         onTabChange={(i) => {
           const item = ITEMS[i];
-          if (item) void navigate({ to: item.to });
+          if (!item) return;
+          if (item.to === "/account" && !user) {
+            void navigate({ to: "/auth" });
+            return;
+          }
+          void navigate({ to: item.to });
         }}
         items={ITEMS.map((item) => ({
           label: item.label,
-          color: item.color,
+          color: "var(--primary)",
           badge: item.to === "/cart" ? count : item.to === "/wishlist" ? ids.size : 0,
           icon: <Icon3D name={item.icon} size="xs" />,
         }))}

@@ -50,8 +50,8 @@ export function ProductGallery({
   const current = images[Math.min(activeIndex, images.length - 1)]!;
 
   return (
-    <div className="lg:sticky lg:top-24">
-      <div className="relative overflow-hidden rounded-[2rem] bg-surface shadow-soft">
+    <div className="w-full max-w-full min-w-0 lg:sticky lg:top-24">
+      <div className="relative w-full max-w-full overflow-hidden rounded-2xl bg-surface shadow-soft">
         <div
           ref={trackRef}
           onScroll={onScroll}
@@ -60,7 +60,7 @@ export function ProductGallery({
           {images.map((img, i) => (
             <div
               key={`${img.url}-${i}`}
-              className="w-full shrink-0 snap-center"
+              className="w-full max-w-full shrink-0 snap-center overflow-hidden"
               onMouseMove={(e) => {
                 const r = e.currentTarget.getBoundingClientRect();
                 setZoom({
@@ -77,7 +77,7 @@ export function ProductGallery({
                 width={900}
                 height={1200}
                 loading={i === 0 ? "eager" : "lazy"}
-                className="aspect-[3/4] w-full cursor-zoom-in object-cover transition-transform duration-300 ease-out"
+                className="aspect-[3/4] h-auto w-full max-w-full cursor-zoom-in object-contain transition-transform duration-300 ease-out"
                 style={
                   zoom && i === activeIndex && !reduce
                     ? { transform: "scale(1.9)", transformOrigin: `${zoom.x}% ${zoom.y}%` }
@@ -105,6 +105,9 @@ export function ProductGallery({
 
         {images.length > 1 && (
           <>
+            <span className="num-strong absolute bottom-3 right-3 rounded-full bg-background/90 px-2 py-0.5 text-[11px]">
+              {activeIndex + 1}/{images.length}
+            </span>
             <button
               type="button"
               aria-label="Previous image"
@@ -182,7 +185,7 @@ export function ProductGallery({
               src={current.url}
               alt={current.alt ?? ""}
 
-              className="max-h-[88vh] w-auto rounded-2xl object-contain"
+              className="max-h-[88vh] max-w-full w-auto rounded-2xl object-contain"
               onClick={(e) => e.stopPropagation()}
             />
           </motion.div>
