@@ -73,7 +73,7 @@ function WishlistCard({ product, index }: { product: Product; index: number }) {
   const addToCart = useCart((s) => s.add);
   const [moving, setMoving] = useState(false);
 
-  async function moveToBag() {
+  async function moveToCart() {
     setMoving(true);
     try {
       const { data: variants, error } = await supabase
@@ -122,11 +122,11 @@ function WishlistCard({ product, index }: { product: Product; index: number }) {
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={moveToBag}
+          onClick={moveToCart}
           disabled={moving}
           className="flex-1 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground disabled:opacity-60"
         >
-          {moving ? "Moving…" : "Move to bag"}
+          {moving ? "Moving…" : "Move to cart"}
         </button>
         <button
           type="button"
