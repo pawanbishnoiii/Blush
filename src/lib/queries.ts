@@ -217,19 +217,6 @@ export const variantFacetsQuery = queryOptions({
   },
 });
 
-const _faqsQueryLegacy = queryOptions({
-  queryKey: ["faqs"],
-  queryFn: async () => {
-    const { data, error } = await supabase
-      .from("faqs")
-      .select("*")
-      .eq("is_published", true)
-      .order("sort_order", { ascending: true });
-    if (error) throw error;
-    return data ?? [];
-  },
-});
-void _faqsQueryLegacy;
 
 export function productDetailQuery(slug: string) {
   return queryOptions({
