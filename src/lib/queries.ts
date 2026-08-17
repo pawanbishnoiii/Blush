@@ -167,6 +167,70 @@ export const faqsQuery = queryOptions({
   },
 });
 
+export type VariantFacets = {
+  /** product id -> available size labels */
+  sizes: Record<string, string[]>;
+  /** product id -> available colour names */
+  colors: Record<string, string[]>;
+  /** global option lists for the filter UI */
+  allSizes: string[];
+  allColors: { name: string; hex: string }[];
+};
+
+/** Lightweight size/colour facets for filter sheets across shop, search and category. */
+export const variantFacetsQuery = queryOptions({
+  queryKey: ["variant_facets"],
+  queryFn: async (): Promise<VariantFacets> => {
+    const { data, error } = await supabase
+      .from("product_variants")
+      .select("product_id,size,color_name,color_hex,stock");
+    if (error) throw error;
+    const sizes: Record<string, string[]> = {};
+    const colors: Record<string, string[]> = {};
+    const sizeSet = new Set<string>();
+    const colorMap = new Map<string, string>();
+    for (const row of data ?? []) {
+      const pid = row.product_id as string;
+      const size = (row.size ?? "").trim();
+      const color = (row.color_name ?? "").trim();
+      if (size) {
+        (sizes[pid] ??= []).includes(size) || sizes[pid]!.push(size);
+        sizeSet.add(size);
+      }
+      if (color) {
+        (colors[pid] ??= []).includes(color) || colors[pid]!.push(color);
+        if (!colorMap.has(color)) colorMap.set(color, (row.color_hex as string) ?? "#ccc");
+      }
+    }
+    const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "3XL", "Free"];
+    return {
+      sizes,
+      colors,
+      allSizes: [...sizeSet].sort((a, b) => {
+        const ia = SIZE_ORDER.indexOf(a);
+        const ib = SIZE_ORDER.indexOf(b);
+        if (ia !== -1 || ib !== -1) return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+        return a.localeCompare(b, undefined, { numeric: true });
+      }),
+      allColors: [...colorMap.entries()].map(([name, hex]) => ({ name, hex })).sort((a, b) => a.name.localeCompare(b.name)),
+    };
+  },
+});
+
+const _faqsQueryLegacy = queryOptions({
+  queryKey: ["faqs"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("faqs")
+      .select("*")
+      .eq("is_published", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+void _faqsQueryLegacy;
+
 export function productDetailQuery(slug: string) {
   return queryOptions({
     queryKey: ["product", slug],
