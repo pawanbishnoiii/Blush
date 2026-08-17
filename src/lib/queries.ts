@@ -177,6 +177,49 @@ export type VariantFacets = {
   allColors: { name: string; hex: string }[];
 };
 
+export type PaymentGateway = {
+  id: string;
+  code: string;
+  name: string;
+  logo_url: string | null;
+  mode: string;
+  is_enabled: boolean;
+  supports_upi: boolean;
+  supports_cards: boolean;
+  supports_netbanking: boolean;
+  supports_wallet: boolean;
+  supports_cod: boolean;
+  merchant_id: string | null;
+  api_key_public: string | null;
+  api_key_secret_name: string | null;
+  webhook_url: string | null;
+  fee_percent: number;
+  notes: string | null;
+  priority: number;
+};
+
+export const paymentGatewaysQuery = queryOptions({
+  queryKey: ["payment_gateways"],
+  queryFn: async (): Promise<PaymentGateway[]> => {
+    const { data, error } = await supabase
+      .from("payment_gateways")
+      .select("*")
+      .order("priority", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as unknown as PaymentGateway[];
+  },
+});
+
+type _VariantFacetsShape = {
+  /** product id -> available size labels */
+  sizes: Record<string, string[]>;
+  /** product id -> available colour names */
+  colors: Record<string, string[]>;
+  /** global option lists for the filter UI */
+  allSizes: string[];
+  allColors: { name: string; hex: string }[];
+};
+
 /** Lightweight size/colour facets for filter sheets across shop, search and category. */
 export const variantFacetsQuery = queryOptions({
   queryKey: ["variant_facets"],
