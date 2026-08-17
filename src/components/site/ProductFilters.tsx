@@ -9,6 +9,7 @@ import { brandsQuery, categoriesQuery } from "@/lib/queries";
 import { inr } from "@/lib/catalog";
 import { cn } from "@/lib/utils";
 import type { PriceRange } from "@/hooks/useProductFilters";
+import type { VariantFacets } from "@/lib/queries";
 
 type Filters = {
   mood: string;
@@ -25,6 +26,16 @@ type Filters = {
   setPrice: (v: PriceRange) => void;
   sort: SortKey;
   setSort: (v: SortKey) => void;
+  minDiscount: number;
+  setMinDiscount: (v: number) => void;
+  minRating: number;
+  setMinRating: (v: number) => void;
+  sizes: string[];
+  toggleSize: (v: string) => void;
+  colors: string[];
+  toggleColor: (v: string) => void;
+  facets?: VariantFacets | undefined;
+  filtered: { id: string }[];
   bounds: PriceRange;
   reset: () => void;
   activeCount: number;
