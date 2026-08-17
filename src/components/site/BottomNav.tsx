@@ -47,7 +47,7 @@ export function BottomNav() {
   const lines = useCart((s) => s.lines);
   const count = cartCount(lines);
   const { ids } = useWishlist();
-  const { user } = useAuth();
+  useAuth();
 
   const activeIndex = Math.max(
     0,
@@ -64,10 +64,6 @@ export function BottomNav() {
         onTabChange={(i) => {
           const item = ITEMS[i];
           if (!item) return;
-          if (item.to === "/account" && !user) {
-            void navigate({ to: "/auth" });
-            return;
-          }
           void navigate({ to: item.to });
         }}
         items={ITEMS.map((item) => ({
