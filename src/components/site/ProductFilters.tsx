@@ -150,6 +150,98 @@ function FilterFields(props: Filters) {
         value={props.gender}
         onChange={props.setGender}
       />
+      <PriceFilter price={props.price} setPrice={props.setPrice} bounds={props.bounds} />
+      <div>
+        <p className="eyebrow text-muted-foreground">Discount</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {[0, 10, 20, 30, 50, 60].map((d) => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => props.setMinDiscount(d)}
+              className={cn(
+                "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all",
+                props.minDiscount === d
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:border-foreground/30",
+              )}
+            >
+              {d === 0 ? "Any" : `${d}%+ off`}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div>
+        <p className="eyebrow text-muted-foreground">Customer rating</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {[0, 3, 3.5, 4, 4.5].map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => props.setMinRating(r)}
+              className={cn(
+                "rounded-full border px-3.5 py-1.5 text-xs font-semibold transition-all",
+                props.minRating === r
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card hover:border-foreground/30",
+              )}
+            >
+              {r === 0 ? "Any" : `${r}★ & above`}
+            </button>
+          ))}
+        </div>
+      </div>
+      {(props.facets?.allSizes.length ?? 0) > 0 && (
+        <div>
+          <p className="eyebrow text-muted-foreground">Size</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {props.facets!.allSizes.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => props.toggleSize(s)}
+                aria-pressed={props.sizes.includes(s)}
+                className={cn(
+                  "min-w-[2.75rem] rounded-xl border px-3 py-2 text-xs font-bold transition-all",
+                  props.sizes.includes(s)
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card hover:border-foreground/30",
+                )}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {(props.facets?.allColors.length ?? 0) > 0 && (
+        <div>
+          <p className="eyebrow text-muted-foreground">Colour</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {props.facets!.allColors.map((c) => (
+              <button
+                key={c.name}
+                type="button"
+                onClick={() => props.toggleColor(c.name)}
+                aria-pressed={props.colors.includes(c.name)}
+                className={cn(
+                  "flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3 text-xs font-semibold capitalize transition-all",
+                  props.colors.includes(c.name)
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-card hover:border-foreground/30",
+                )}
+              >
+                <span
+                  className="h-5 w-5 rounded-full border border-border"
+                  style={{ background: c.hex }}
+                  aria-hidden
+                />
+                {c.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       <Chips
         label="Category"
         options={(categories.data ?? []).map((c) => ({ key: c.slug, label: c.name }))}
@@ -164,7 +256,6 @@ function FilterFields(props: Filters) {
       />
       <Chips label="Mood" options={MOODS.map((m) => ({ key: m.key, label: m.label }))} value={props.mood} onChange={props.setMood} />
       <Chips label="Occasion" options={OCCASIONS} value={props.occasion} onChange={props.setOccasion} />
-      <PriceFilter price={props.price} setPrice={props.setPrice} bounds={props.bounds} />
     </div>
   );
 }
@@ -217,7 +308,7 @@ export function ProductFilterBar(props: Filters & { className?: string }) {
               Reset
             </Button>
             <SheetClose asChild>
-              <Button className="flex-1 rounded-full">Show results</Button>
+              <Button className="flex-1 rounded-full">Show {props.filtered.length} results</Button>
             </SheetClose>
           </div>
         </SheetContent>

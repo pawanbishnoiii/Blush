@@ -22,12 +22,6 @@ const ITEMS: Item[] = [
     match: (p) => p.startsWith("/shop") || p.startsWith("/product") || p.startsWith("/category"),
   },
   {
-    to: "/offers",
-    label: "Offers",
-    icon: "offers",
-    match: (p) => p.startsWith("/offers") || p.startsWith("/search"),
-  },
-  {
     to: "/wishlist",
     label: "Wishlist",
     icon: "wishlist",
@@ -41,7 +35,7 @@ const ITEMS: Item[] = [
   },
   {
     to: "/account",
-    label: "Account",
+    label: "Profile",
     icon: "profile",
     match: (p) => p.startsWith("/account") || p.startsWith("/orders") || p.startsWith("/auth"),
   },
