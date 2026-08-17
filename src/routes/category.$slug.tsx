@@ -44,6 +44,7 @@ function iconFor(slug: string) {
 function CategoryPage() {
   const { slug } = Route.useParams();
   const products = useQuery(productsQuery);
+  const facets = useQuery(variantFacetsQuery);
   const title = label(slug);
 
   const matches = useMemo(() => {
