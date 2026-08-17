@@ -239,11 +239,13 @@ export const OCCASIONS: { key: string; label: string }[] = [
   { key: "self-care", label: "Self-care" },
 ];
 
-export type SortKey = "newest" | "price-asc" | "price-desc" | "top-rated";
+export type SortKey = "newest" | "popular" | "price-asc" | "price-desc" | "top-rated" | "discount";
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "popular", label: "Popularity" },
   { key: "newest", label: "Newest" },
   { key: "price-asc", label: "Price: Low to High" },
   { key: "price-desc", label: "Price: High to Low" },
   { key: "top-rated", label: "Top Rated" },
+  { key: "discount", label: "Discount" },
 ];
