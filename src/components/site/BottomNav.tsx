@@ -3,7 +3,6 @@ import { Icon3D } from "@/components/site/Icon3D";
 import { AnimatedTabBar } from "@/components/ui/animated-tab-bar";
 import { cartCount, useCart } from "@/lib/cart-store";
 import { useWishlist } from "@/hooks/useWishlist";
-import { useAuth } from "@/hooks/useAuth";
 import type { Icon3DName } from "@/lib/icons3d";
 
 type Item = {
@@ -47,7 +46,6 @@ export function BottomNav() {
   const lines = useCart((s) => s.lines);
   const count = cartCount(lines);
   const { ids } = useWishlist();
-  useAuth();
 
   const activeIndex = Math.max(
     0,
