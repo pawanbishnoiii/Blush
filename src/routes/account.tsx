@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -46,6 +46,7 @@ const SHORTCUTS: Shortcut[] = [
 function AccountPage() {
   const { user, loading, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const qc = useQueryClient();
   const { ids } = useWishlist();
   const profile = useQuery({ ...myProfileQuery, enabled: Boolean(user) });
@@ -64,6 +65,8 @@ function AccountPage() {
       setMoods(profile.data.preferred_moods ?? []);
     }
   }, [profile.data]);
+
+  if (pathname !== "/account") return <Outlet />;
 
   if (loading) {
     return <div className="px-5 py-20 text-center text-sm text-muted-foreground">Loading…</div>;
