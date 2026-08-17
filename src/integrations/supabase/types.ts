@@ -743,6 +743,75 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_gateways: {
+        Row: {
+          api_key_public: string | null
+          api_key_secret_name: string | null
+          code: string
+          created_at: string
+          fee_percent: number
+          id: string
+          is_enabled: boolean
+          logo_url: string | null
+          merchant_id: string | null
+          mode: string
+          name: string
+          notes: string | null
+          priority: number
+          supports_cards: boolean
+          supports_cod: boolean
+          supports_netbanking: boolean
+          supports_upi: boolean
+          supports_wallet: boolean
+          updated_at: string
+          webhook_url: string | null
+        }
+        Insert: {
+          api_key_public?: string | null
+          api_key_secret_name?: string | null
+          code: string
+          created_at?: string
+          fee_percent?: number
+          id?: string
+          is_enabled?: boolean
+          logo_url?: string | null
+          merchant_id?: string | null
+          mode?: string
+          name: string
+          notes?: string | null
+          priority?: number
+          supports_cards?: boolean
+          supports_cod?: boolean
+          supports_netbanking?: boolean
+          supports_upi?: boolean
+          supports_wallet?: boolean
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Update: {
+          api_key_public?: string | null
+          api_key_secret_name?: string | null
+          code?: string
+          created_at?: string
+          fee_percent?: number
+          id?: string
+          is_enabled?: boolean
+          logo_url?: string | null
+          merchant_id?: string | null
+          mode?: string
+          name?: string
+          notes?: string | null
+          priority?: number
+          supports_cards?: boolean
+          supports_cod?: boolean
+          supports_netbanking?: boolean
+          supports_upi?: boolean
+          supports_wallet?: boolean
+          updated_at?: string
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           alt: string | null

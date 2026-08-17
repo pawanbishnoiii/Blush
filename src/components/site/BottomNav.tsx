@@ -3,7 +3,6 @@ import { Icon3D } from "@/components/site/Icon3D";
 import { AnimatedTabBar } from "@/components/ui/animated-tab-bar";
 import { cartCount, useCart } from "@/lib/cart-store";
 import { useWishlist } from "@/hooks/useWishlist";
-import { useAuth } from "@/hooks/useAuth";
 import type { Icon3DName } from "@/lib/icons3d";
 
 type Item = {
@@ -22,12 +21,6 @@ const ITEMS: Item[] = [
     match: (p) => p.startsWith("/shop") || p.startsWith("/product") || p.startsWith("/category"),
   },
   {
-    to: "/offers",
-    label: "Offers",
-    icon: "offers",
-    match: (p) => p.startsWith("/offers") || p.startsWith("/search"),
-  },
-  {
     to: "/wishlist",
     label: "Wishlist",
     icon: "wishlist",
@@ -41,7 +34,7 @@ const ITEMS: Item[] = [
   },
   {
     to: "/account",
-    label: "Account",
+    label: "Profile",
     icon: "profile",
     match: (p) => p.startsWith("/account") || p.startsWith("/orders") || p.startsWith("/auth"),
   },
@@ -53,7 +46,6 @@ export function BottomNav() {
   const lines = useCart((s) => s.lines);
   const count = cartCount(lines);
   const { ids } = useWishlist();
-  const { user } = useAuth();
 
   const activeIndex = Math.max(
     0,
@@ -70,10 +62,6 @@ export function BottomNav() {
         onTabChange={(i) => {
           const item = ITEMS[i];
           if (!item) return;
-          if (item.to === "/account" && !user) {
-            void navigate({ to: "/auth" });
-            return;
-          }
           void navigate({ to: item.to });
         }}
         items={ITEMS.map((item) => ({

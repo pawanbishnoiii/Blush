@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ProductCard } from "@/components/site/ProductCard";
 import { ProductFilterBar } from "@/components/site/ProductFilters";
 import { useProductFilters, type PriceRange } from "@/hooks/useProductFilters";
-import { productsQuery } from "@/lib/queries";
+import { productsQuery, variantFacetsQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/shop")({
@@ -30,6 +30,7 @@ export const Route = createFileRoute("/shop")({
 
 function Shop() {
   const products = useQuery(productsQuery);
+  const facets = useQuery(variantFacetsQuery);
   const [filter, setFilter] = useState<string>("All");
 
   const all = products.data ?? [];
@@ -42,7 +43,7 @@ function Shop() {
     return [Math.min(...prices), Math.max(...prices)];
   }, [all]);
 
-  const filters = useProductFilters(byCategory, bounds);
+  const filters = useProductFilters(byCategory, bounds, facets.data);
   const visible = filters.filtered;
 
   return (

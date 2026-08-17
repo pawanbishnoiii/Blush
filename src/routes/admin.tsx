@@ -28,6 +28,7 @@ const NAV: { to: string; label: string; icon: Icon3DName }[] = [
   { to: "/admin/orders", label: "Orders", icon: "my-orders" },
   { to: "/admin/banners", label: "Banners", icon: "offers" },
   { to: "/admin/delivery", label: "Delivery", icon: "fast-delivery" },
+  { to: "/admin/payments", label: "Payments", icon: "secure-payment" },
   { to: "/admin/reviews", label: "Reviews", icon: "camera-review" },
   { to: "/admin/customers", label: "Customers", icon: "profile" },
 ];

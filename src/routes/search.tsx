@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { ProductFilterBar } from "@/components/site/ProductFilters";
 import { useProductFilters } from "@/hooks/useProductFilters";
 import { useRecentSearches } from "@/hooks/useRecentSearches";
-import { productsQuery } from "@/lib/queries";
+import { productsQuery, variantFacetsQuery } from "@/lib/queries";
 import { DISCOVERY, FASHION, BEAUTY } from "@/lib/taxonomy";
 
 const TRENDING = ["cute top", "lip gloss", "tote bag", "kurti", "perfume"];
@@ -33,6 +33,7 @@ function SearchPage() {
   const { q: initialQ } = Route.useSearch();
   const [q, setQ] = useState(initialQ ?? "");
   const products = useQuery(productsQuery);
+  const facets = useQuery(variantFacetsQuery);
   const { recent, add, remove, clear } = useRecentSearches();
 
   useEffect(() => {
@@ -50,7 +51,7 @@ function SearchPage() {
     );
   }, [q, products.data]);
 
-  const filters = useProductFilters(matches);
+  const filters = useProductFilters(matches, undefined, facets.data);
   const results = filters.filtered;
 
   const runSearch = (term: string) => {
