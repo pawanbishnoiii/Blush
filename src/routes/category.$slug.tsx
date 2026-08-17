@@ -5,7 +5,7 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { Icon3D } from "@/components/site/Icon3D";
 import { ProductFilterBar } from "@/components/site/ProductFilters";
 import { useProductFilters, type PriceRange } from "@/hooks/useProductFilters";
-import { productsQuery } from "@/lib/queries";
+import { productsQuery, variantFacetsQuery } from "@/lib/queries";
 import { BEAUTY, FASHION, VIBES } from "@/lib/taxonomy";
 import type { Product } from "@/lib/catalog";
 
@@ -66,7 +66,7 @@ function CategoryPage() {
     return [Math.min(...prices), Math.max(...prices)];
   }, [matches]);
 
-  const filters = useProductFilters(matches, bounds);
+  const filters = useProductFilters(matches, bounds, facets.data);
   const items = filters.filtered;
 
   return (
