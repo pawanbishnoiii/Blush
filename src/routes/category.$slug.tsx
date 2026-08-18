@@ -101,11 +101,38 @@ function CategoryPage() {
           <Icon3D name={iconFor(slug)} size="xl" />
           <div className="min-w-0">
             <h1 className="truncate font-display text-3xl font-extrabold tracking-tight">{title}</h1>
-            <p className="text-sm text-muted-foreground">{items.length} products</p>
+            <p className="text-sm text-muted-foreground">{withChildren.length} products</p>
           </div>
         </div>
         {matches.length > 0 && <ProductFilterBar {...filters} />}
       </div>
+
+      {subCategories.length > 0 && (
+        <div className="-mx-5 mt-5 flex gap-3 overflow-x-auto px-5 pb-1 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {subCategories.map((c: { slug: string; name: string; image_url: string | null }) => (
+            <Link
+              key={c.slug}
+              to="/category/$slug"
+              params={{ slug: c.slug }}
+              className="w-[86px] shrink-0 text-center"
+            >
+              <span className="block h-[86px] w-[86px] overflow-hidden rounded-2xl bg-surface">
+                {c.image_url ? (
+                  <img
+                    src={c.image_url}
+                    alt={c.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <Icon3D name={iconFor(c.slug)} size="md" className="mx-auto mt-5" />
+                )}
+              </span>
+              <span className="mt-1.5 block truncate text-[11px] font-semibold">{c.name}</span>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {products.isLoading ? (
         <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
@@ -113,7 +140,7 @@ function CategoryPage() {
             <div key={i} className="aspect-[4/5] animate-pulse rounded-3xl bg-muted" />
           ))}
         </div>
-      ) : items.length === 0 ? (
+      ) : withChildren.length === 0 ? (
         <div className="mt-16 flex flex-col items-center gap-4 text-center">
           <Icon3D name={matches.length === 0 ? "search" : "filters"} size="2xl" />
           <p className="font-display text-xl font-bold">
@@ -143,7 +170,7 @@ function CategoryPage() {
         </div>
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {items.map((p, i) => (
+          {withChildren.map((p, i) => (
             <ProductCard key={p.id} product={p} index={i} />
           ))}
         </div>
