@@ -82,6 +82,8 @@ function AdminDelivery() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+      <div className="space-y-6">
+      <ShiprocketPanel list={list} onSaved={() => void refresh()} />
       <section className="rounded-3xl border border-border bg-card p-5 shadow-soft">
         <div className="flex items-center gap-2">
           <Icon3D name="fast-delivery" size="md" />
@@ -127,6 +129,7 @@ function AdminDelivery() {
           </button>
         </div>
       </section>
+      </div>
 
       <section className="space-y-3">
         {providers.isLoading && <p className="text-sm text-muted-foreground">Loading couriers…</p>}
