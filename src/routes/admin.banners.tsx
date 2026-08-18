@@ -25,6 +25,7 @@ type Draft = {
   cta_label: string;
   placement: string;
   sort_order: number;
+  corner_radius: number;
 };
 
 const EMPTY: Draft = {
@@ -38,6 +39,7 @@ const EMPTY: Draft = {
   cta_label: "",
   placement: "hero",
   sort_order: 0,
+  corner_radius: 24,
 };
 
 function AdminBanners() {
@@ -89,6 +91,7 @@ function AdminBanners() {
       cta_label: draft.cta_label.trim() || null,
       placement: draft.placement,
       sort_order: Number(draft.sort_order) || 0,
+      corner_radius: Math.max(0, Math.min(64, Number(draft.corner_radius) || 0)),
     });
     setBusy(false);
     if (error) {
@@ -284,6 +287,30 @@ function AdminBanners() {
               />
             </Field>
           </div>
+
+          <Field label={`Corner radius — ${draft.corner_radius}px${draft.corner_radius === 0 ? " (square)" : ""}`}>
+            <input
+              type="range"
+              min={0}
+              max={64}
+              step={2}
+              value={draft.corner_radius}
+              onChange={(e) => setDraft({ ...draft, corner_radius: Number(e.target.value) })}
+              className="w-full accent-primary"
+            />
+            <div className="mt-2 flex gap-2">
+              {[0, 16, 24, 40].map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setDraft({ ...draft, corner_radius: r })}
+                  className="rounded-full border border-border px-3 py-1 text-[11px] font-bold"
+                >
+                  {r === 0 ? "Rounded off" : `${r}px`}
+                </button>
+              ))}
+            </div>
+          </Field>
 
           <button
             type="button"
