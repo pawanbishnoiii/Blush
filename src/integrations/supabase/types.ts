@@ -153,6 +153,7 @@ export type Database = {
       }
       banners: {
         Row: {
+          corner_radius: number
           created_at: string
           cta_label: string | null
           ends_at: string | null
@@ -172,6 +173,7 @@ export type Database = {
           video_url: string | null
         }
         Insert: {
+          corner_radius?: number
           created_at?: string
           cta_label?: string | null
           ends_at?: string | null
@@ -191,6 +193,7 @@ export type Database = {
           video_url?: string | null
         }
         Update: {
+          corner_radius?: number
           created_at?: string
           cta_label?: string | null
           ends_at?: string | null
@@ -466,8 +469,10 @@ export type Database = {
       delivery_providers: {
         Row: {
           api_base_url: string | null
+          api_email: string | null
           api_key_secret_name: string | null
           code: string
+          config: Json
           created_at: string
           id: string
           is_enabled: boolean
@@ -481,11 +486,15 @@ export type Database = {
           supports_reverse_pickup: boolean
           tracking_url_pattern: string | null
           updated_at: string
+          webhook_token: string | null
+          webhook_url: string | null
         }
         Insert: {
           api_base_url?: string | null
+          api_email?: string | null
           api_key_secret_name?: string | null
           code: string
+          config?: Json
           created_at?: string
           id?: string
           is_enabled?: boolean
@@ -499,11 +508,15 @@ export type Database = {
           supports_reverse_pickup?: boolean
           tracking_url_pattern?: string | null
           updated_at?: string
+          webhook_token?: string | null
+          webhook_url?: string | null
         }
         Update: {
           api_base_url?: string | null
+          api_email?: string | null
           api_key_secret_name?: string | null
           code?: string
+          config?: Json
           created_at?: string
           id?: string
           is_enabled?: boolean
@@ -517,6 +530,8 @@ export type Database = {
           supports_reverse_pickup?: boolean
           tracking_url_pattern?: string | null
           updated_at?: string
+          webhook_token?: string | null
+          webhook_url?: string | null
         }
         Relationships: []
       }
@@ -673,8 +688,11 @@ export type Database = {
           longitude: number | null
           order_code: string
           payment_method: string
+          payment_status: string
           phone: string
           pincode: string
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
           refund_status: string | null
           shipping: number
           state: string
@@ -701,8 +719,11 @@ export type Database = {
           longitude?: number | null
           order_code: string
           payment_method: string
+          payment_status?: string
           phone: string
           pincode: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           refund_status?: string | null
           shipping: number
           state: string
@@ -729,8 +750,11 @@ export type Database = {
           longitude?: number | null
           order_code?: string
           payment_method?: string
+          payment_status?: string
           phone?: string
           pincode?: string
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
           refund_status?: string | null
           shipping?: number
           state?: string
@@ -1262,6 +1286,48 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          admin_reply: string | null
+          category: string
+          created_at: string
+          id: string
+          message: string
+          order_code: string | null
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_reply?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          message: string
+          order_code?: string | null
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_reply?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          message?: string
+          order_code?: string | null
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tracking_events: {
         Row: {
           happened_at: string
@@ -1362,6 +1428,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_delivered: {
+        Args: { _product_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_purchased: {
         Args: { _product_id: string; _user_id: string }
         Returns: boolean
