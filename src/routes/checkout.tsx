@@ -13,6 +13,7 @@ import { myAddressesQuery, productImagesQuery, settingsQuery } from "@/lib/queri
 import { couponDiscount, couponError as couponErrorFor, deliveryEstimate, inr, type Coupon } from "@/lib/catalog";
 import { resolveLineImage } from "@/lib/image";
 import { placeOrder } from "@/lib/orders.functions";
+import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/payments.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -42,8 +43,26 @@ const formSchema = z.object({
   city: z.string().trim().min(2, "Enter your city").max(60),
   state: z.string().trim().min(2, "Enter your state").max(60),
   pincode: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6-digit PIN code"),
-  paymentMethod: z.enum(["upi", "card", "cod"]),
+  paymentMethod: z.enum(["razorpay", "upi", "cod"]),
 });
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+function loadRazorpayScript() {
+  return new Promise<boolean>((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -68,6 +87,8 @@ function Checkout() {
   const productImages = useQuery(productImagesQuery);
   const addresses = useQuery({ ...myAddressesQuery, enabled: Boolean(user) });
   const submitOrder = useServerFn(placeOrder);
+  const startPayment = useServerFn(createRazorpayOrder);
+  const confirmPayment = useServerFn(verifyRazorpayPayment);
   const [locating, setLocating] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -85,7 +106,7 @@ function Checkout() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { paymentMethod: "upi", addressLine2: "" },
+    defaultValues: { paymentMethod: "razorpay", addressLine2: "" },
   });
 
   const paymentMethod = watch("paymentMethod");
@@ -264,6 +285,14 @@ function Checkout() {
     if (lines.length === 0) return;
     setSubmitting(true);
     try {
+      let paid: { orderId: string; paymentId: string; signature: string } | null = null;
+      if (values.paymentMethod === "razorpay") {
+        paid = await payWithRazorpay(values);
+        if (!paid) {
+          setSubmitting(false);
+          return;
+        }
+      }
       const result = await submitOrder({
         data: {
           ...values,
@@ -273,6 +302,16 @@ function Checkout() {
           ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
         },
       });
+      if (paid) {
+        await confirmPayment({
+          data: {
+            orderCode: result.orderCode,
+            razorpayOrderId: paid.orderId,
+            razorpayPaymentId: paid.paymentId,
+            razorpaySignature: paid.signature,
+          },
+        });
+      }
       await rememberAddress(values);
       clear();
       navigate({ to: "/order/$code", params: { code: result.orderCode } });
@@ -283,6 +322,54 @@ function Checkout() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  /** Opens Razorpay with the amount and shopper details prefilled. */
+  async function payWithRazorpay(values: FormValues) {
+    const session = await startPayment({ data: { amount: Math.round(total * 100) } });
+
+    if (session.mode === "demo") {
+      toast.info("Razorpay is in demo mode", {
+        description: "Add your live keys in Admin → Payments to take real payments.",
+      });
+      return {
+        orderId: session.orderId,
+        paymentId: `demo_pay_${Date.now()}`,
+        signature: "",
+      };
+    }
+
+    const ready = await loadRazorpayScript();
+    if (!ready || !window.Razorpay) {
+      toast.error("Couldn't open Razorpay — check your connection");
+      return null;
+    }
+
+    return new Promise<{ orderId: string; paymentId: string; signature: string } | null>((resolve) => {
+      const rzp = new window.Razorpay!({
+        key: session.keyId,
+        amount: session.amount,
+        currency: "INR",
+        name: "Blush",
+        description: `${lines.length} item${lines.length > 1 ? "s" : ""}`,
+        order_id: session.orderId,
+        prefill: { name: values.fullName, email: values.email, contact: values.phone },
+        notes: { pincode: values.pincode },
+        theme: { color: "#e5487f" },
+        modal: { ondismiss: () => resolve(null) },
+        handler: (res: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) =>
+          resolve({
+            orderId: res.razorpay_order_id,
+            paymentId: res.razorpay_payment_id,
+            signature: res.razorpay_signature,
+          }),
+      });
+      rzp.open();
+    });
   }
 
   if (lines.length === 0) {
@@ -418,18 +505,18 @@ function Checkout() {
             <Section step="03" title="Payment">
               <div className="grid gap-3 sm:grid-cols-3">
                 <PayOption
-                  active={paymentMethod === "upi"}
-                  icon={<Smartphone className="h-4 w-4" />}
-                  label="UPI"
-                  hint="GPay, PhonePe, Paytm"
-                  onClick={() => setValue("paymentMethod", "upi")}
+                  active={paymentMethod === "razorpay"}
+                  icon={<CreditCard className="h-4 w-4" />}
+                  label="Pay with Razorpay"
+                  hint="UPI, cards, netbanking, wallets"
+                  onClick={() => setValue("paymentMethod", "razorpay")}
                 />
                 <PayOption
-                  active={paymentMethod === "card"}
-                  icon={<CreditCard className="h-4 w-4" />}
-                  label="Card"
-                  hint="Credit / debit"
-                  onClick={() => setValue("paymentMethod", "card")}
+                  active={paymentMethod === "upi"}
+                  icon={<Smartphone className="h-4 w-4" />}
+                  label="UPI on delivery"
+                  hint="Scan the courier's QR"
+                  onClick={() => setValue("paymentMethod", "upi")}
                 />
                 <PayOption
                   active={paymentMethod === "cod"}
@@ -441,9 +528,9 @@ function Checkout() {
               </div>
               <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <Lock className="h-3.5 w-3.5" />
-                {paymentMethod === "cod"
-                  ? "Keep the exact amount ready — our courier carries a UPI QR as backup."
-                  : "You'll be asked to authorise the payment on the confirmation step."}
+                {paymentMethod === "razorpay"
+                  ? `Razorpay opens with ${inr(total)} and your details already filled in.`
+                  : "Keep the exact amount ready — our courier carries a UPI QR as backup."}
               </p>
             </Section>
           </div>

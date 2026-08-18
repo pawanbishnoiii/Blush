@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, Loader2, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
@@ -19,6 +19,20 @@ export function ReviewForm({
 }) {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const delivered = useQuery({
+    queryKey: ["can-review", productId, user?.id ?? "guest"],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order_items")
+        .select("id, orders!inner(status)")
+        .eq("product_id", productId)
+        .eq("orders.status", "delivered")
+        .limit(1);
+      if (error) throw error;
+      return (data ?? []).length > 0;
+    },
+  });
   const fileRef = useRef<HTMLInputElement>(null);
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
@@ -41,6 +55,31 @@ export function ReviewForm({
           className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
         >
           Sign in to review
+        </Link>
+      </div>
+    );
+  }
+
+  if (delivered.isLoading) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
+        Checking your orders…
+      </div>
+    );
+  }
+
+  if (delivered.data === false) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border bg-card p-6 text-center">
+        <p className="font-display text-base font-extrabold">Verified reviews only</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          You can rate this product once your order has been delivered.
+        </p>
+        <Link
+          to="/orders"
+          className="mt-4 inline-flex rounded-full border border-border px-5 py-2.5 text-sm font-bold"
+        >
+          View my orders
         </Link>
       </div>
     );

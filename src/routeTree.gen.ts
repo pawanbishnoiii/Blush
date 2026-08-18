@@ -45,6 +45,7 @@ import { Route as TrackIndexRouteImport } from './routes/track.index'
 import { Route as TrackCodeRouteImport } from './routes/track.$code'
 import { Route as OrdersOrderIdIndexRouteImport } from './routes/orders.$orderId.index'
 import { Route as OrdersOrderIdTrackRouteImport } from './routes/orders.$orderId.track'
+import { Route as ApiPublicWebhooksShiprocketRouteImport } from './routes/api/public/webhooks/shiprocket'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -226,6 +227,12 @@ const OrdersOrderIdTrackRoute = OrdersOrderIdTrackRouteImport.update({
   path: '/orders/$orderId/track',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhooksShiprocketRoute =
+  ApiPublicWebhooksShiprocketRouteImport.update({
+    id: '/api/public/webhooks/shiprocket',
+    path: '/api/public/webhooks/shiprocket',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -264,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/track/': typeof TrackIndexRoute
   '/orders/$orderId/track': typeof OrdersOrderIdTrackRoute
   '/orders/$orderId/': typeof OrdersOrderIdIndexRoute
+  '/api/public/webhooks/shiprocket': typeof ApiPublicWebhooksShiprocketRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -301,6 +309,7 @@ export interface FileRoutesByTo {
   '/track': typeof TrackIndexRoute
   '/orders/$orderId/track': typeof OrdersOrderIdTrackRoute
   '/orders/$orderId': typeof OrdersOrderIdIndexRoute
+  '/api/public/webhooks/shiprocket': typeof ApiPublicWebhooksShiprocketRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -340,6 +349,7 @@ export interface FileRoutesById {
   '/track/': typeof TrackIndexRoute
   '/orders/$orderId/track': typeof OrdersOrderIdTrackRoute
   '/orders/$orderId/': typeof OrdersOrderIdIndexRoute
+  '/api/public/webhooks/shiprocket': typeof ApiPublicWebhooksShiprocketRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -380,6 +390,7 @@ export interface FileRouteTypes {
     | '/track/'
     | '/orders/$orderId/track'
     | '/orders/$orderId/'
+    | '/api/public/webhooks/shiprocket'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -417,6 +428,7 @@ export interface FileRouteTypes {
     | '/track'
     | '/orders/$orderId/track'
     | '/orders/$orderId'
+    | '/api/public/webhooks/shiprocket'
   id:
     | '__root__'
     | '/'
@@ -455,6 +467,7 @@ export interface FileRouteTypes {
     | '/track/'
     | '/orders/$orderId/track'
     | '/orders/$orderId/'
+    | '/api/public/webhooks/shiprocket'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -478,6 +491,7 @@ export interface RootRouteChildren {
   TrackIndexRoute: typeof TrackIndexRoute
   OrdersOrderIdTrackRoute: typeof OrdersOrderIdTrackRoute
   OrdersOrderIdIndexRoute: typeof OrdersOrderIdIndexRoute
+  ApiPublicWebhooksShiprocketRoute: typeof ApiPublicWebhooksShiprocketRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -734,6 +748,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OrdersOrderIdTrackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/shiprocket': {
+      id: '/api/public/webhooks/shiprocket'
+      path: '/api/public/webhooks/shiprocket'
+      fullPath: '/api/public/webhooks/shiprocket'
+      preLoaderRoute: typeof ApiPublicWebhooksShiprocketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -807,6 +828,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrackIndexRoute: TrackIndexRoute,
   OrdersOrderIdTrackRoute: OrdersOrderIdTrackRoute,
   OrdersOrderIdIndexRoute: OrdersOrderIdIndexRoute,
+  ApiPublicWebhooksShiprocketRoute: ApiPublicWebhooksShiprocketRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

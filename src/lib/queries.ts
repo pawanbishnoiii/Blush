@@ -378,6 +378,7 @@ export type Banner = {
   starts_at: string;
   ends_at: string | null;
   sort_order: number;
+  corner_radius: number;
 };
 
 export function bannersQuery(placement?: string) {

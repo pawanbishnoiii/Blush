@@ -22,7 +22,7 @@ export const placeOrderSchema = z.object({
   pincode: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6-digit PIN code"),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  paymentMethod: z.enum(["cod", "upi", "card"]),
+  paymentMethod: z.enum(["cod", "upi", "card", "razorpay"]),
   items: z.array(itemSchema).min(1).max(20),
   couponCode: z.string().trim().max(40).optional().or(z.literal("")),
 });
@@ -190,8 +190,8 @@ export const placeOrder = createServerFn({ method: "POST" })
         total,
         payment_method: data.paymentMethod,
         status: "confirmed",
-        courier: "Esko Express",
-        tracking_number: `EX${Date.now().toString().slice(-10)}`,
+        courier: "Shiprocket",
+        tracking_number: `SR${Date.now().toString().slice(-10)}`,
         eta: eta.toISOString().slice(0, 10),
       })
       .select("id, order_code")

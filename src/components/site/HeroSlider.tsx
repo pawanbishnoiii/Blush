@@ -50,7 +50,8 @@ export function HeroSlider({ banners, fallback }: { banners: Banner[]; fallback:
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      className="relative overflow-hidden rounded-[2rem] shadow-lift outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      style={{ borderRadius: `${slides?.[index]?.corner_radius ?? 24}px` }}
+      className="relative overflow-hidden shadow-lift outline-none transition-[border-radius] duration-300 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <div
         className="flex aspect-[4/3] w-full sm:aspect-[16/10]"

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Icon3D } from "@/components/site/Icon3D";
@@ -13,6 +14,138 @@ export const Route = createFileRoute("/admin/delivery")({
 
 const inputCls =
   "w-full rounded-2xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring";
+
+type ShiprocketRow = DeliveryProvider & {
+  api_email?: string | null;
+  webhook_token?: string | null;
+  webhook_url?: string | null;
+};
+
+/**
+ * Shiprocket is the only live courier. Everything Shiprocket needs — panel
+ * login email, the API token secret name, and the status webhook — lives here.
+ */
+function ShiprocketPanel({ list, onSaved }: { list: DeliveryProvider[]; onSaved: () => void }) {
+  const sr = list.find((p) => p.code === "shiprocket") as ShiprocketRow | undefined;
+  const [email, setEmail] = useState("");
+  const [secretName, setSecretName] = useState("");
+  const [token, setToken] = useState("");
+  const [seeded, setSeeded] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  if (sr && !seeded) {
+    setEmail(sr.api_email ?? "");
+    setSecretName(sr.api_key_secret_name ?? "SHIPROCKET_API_TOKEN");
+    setToken(sr.webhook_token ?? "");
+    setSeeded(true);
+  }
+
+  const webhookUrl =
+    typeof window === "undefined"
+      ? "/api/public/webhooks/shiprocket"
+      : `${window.location.origin}/api/public/webhooks/shiprocket`;
+
+  async function save() {
+    if (!sr) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("delivery_providers")
+      .update({
+        api_email: email.trim() || null,
+        api_key_secret_name: secretName.trim() || null,
+        webhook_token: token.trim() || null,
+        webhook_url: webhookUrl,
+        is_enabled: true,
+      } as never)
+      .eq("id", sr.id);
+    setSaving(false);
+    if (error) return void toast.error(error.message);
+    onSaved();
+    toast.success("Shiprocket settings saved");
+  }
+
+  return (
+    <section className="rounded-3xl border border-border bg-card p-5 shadow-soft">
+      <div className="flex items-center gap-2">
+        <Icon3D name="fast-delivery" size="md" />
+        <h2 className="font-display text-base font-extrabold">Shiprocket</h2>
+      </div>
+      {!sr ? (
+        <p className="mt-3 text-sm text-muted-foreground">Shiprocket courier row is missing.</p>
+      ) : (
+        <div className="mt-4 space-y-3">
+          <label className="block">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Panel / API user email
+            </span>
+            <input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="api-user@yourstore.in"
+              className={cn(inputCls, "mt-1")}
+            />
+          </label>
+          <label className="block">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              API token secret name
+            </span>
+            <input
+              value={secretName}
+              onChange={(e) => setSecretName(e.target.value)}
+              placeholder="SHIPROCKET_API_TOKEN"
+              className={cn(inputCls, "mt-1")}
+            />
+          </label>
+          <label className="block">
+            <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Webhook auth token
+            </span>
+            <input
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="Paste the same token into Shiprocket"
+              className={cn(inputCls, "mt-1")}
+            />
+          </label>
+          <div className="rounded-2xl bg-surface p-3">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">
+              Webhook URL
+            </p>
+            <div className="mt-1 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+              <code className="truncate text-[11px]">{webhookUrl}</code>
+              <button
+                type="button"
+                onClick={() => {
+                  void navigator.clipboard.writeText(webhookUrl);
+                  toast.success("Webhook URL copied");
+                }}
+                className="shrink-0 rounded-full border border-border p-1.5"
+                aria-label="Copy webhook URL"
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => void save()}
+            className="w-full rounded-full px-5 py-3 text-sm font-bold text-primary-foreground shadow-glow disabled:opacity-60"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            {saving ? "Saving…" : "Save Shiprocket settings"}
+          </button>
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            In Shiprocket → Settings → API → Webhooks, paste the URL above and the same auth token.
+            Status updates (picked up, in transit, out for delivery, delivered, RTO) then flow into
+            order tracking automatically. Keep the API token value itself in your backend secrets —
+            only the secret name is stored here.
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
 
 function AdminDelivery() {
   const qc = useQueryClient();
@@ -81,6 +214,8 @@ function AdminDelivery() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
+      <div className="space-y-6">
+      <ShiprocketPanel list={list} onSaved={() => void refresh()} />
       <section className="rounded-3xl border border-border bg-card p-5 shadow-soft">
         <div className="flex items-center gap-2">
           <Icon3D name="fast-delivery" size="md" />
@@ -126,6 +261,7 @@ function AdminDelivery() {
           </button>
         </div>
       </section>
+      </div>
 
       <section className="space-y-3">
         {providers.isLoading && <p className="text-sm text-muted-foreground">Loading couriers…</p>}
