@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Camera, Loader2, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "@tanstack/react-router";
@@ -19,6 +19,20 @@ export function ReviewForm({
 }) {
   const { user } = useAuth();
   const qc = useQueryClient();
+  const delivered = useQuery({
+    queryKey: ["can-review", productId, user?.id ?? "guest"],
+    enabled: Boolean(user),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("order_items")
+        .select("id, orders!inner(status)")
+        .eq("product_id", productId)
+        .eq("orders.status", "delivered")
+        .limit(1);
+      if (error) throw error;
+      return (data ?? []).length > 0;
+    },
+  });
   const fileRef = useRef<HTMLInputElement>(null);
   const [rating, setRating] = useState(5);
   const [hover, setHover] = useState(0);
