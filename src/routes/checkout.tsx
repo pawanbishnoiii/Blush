@@ -13,6 +13,7 @@ import { myAddressesQuery, productImagesQuery, settingsQuery } from "@/lib/queri
 import { couponDiscount, couponError as couponErrorFor, deliveryEstimate, inr, type Coupon } from "@/lib/catalog";
 import { resolveLineImage } from "@/lib/image";
 import { placeOrder } from "@/lib/orders.functions";
+import { createRazorpayOrder, verifyRazorpayPayment } from "@/lib/payments.functions";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -42,8 +43,26 @@ const formSchema = z.object({
   city: z.string().trim().min(2, "Enter your city").max(60),
   state: z.string().trim().min(2, "Enter your state").max(60),
   pincode: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6-digit PIN code"),
-  paymentMethod: z.enum(["upi", "card", "cod"]),
+  paymentMethod: z.enum(["razorpay", "upi", "cod"]),
 });
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
+
+function loadRazorpayScript() {
+  return new Promise<boolean>((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if (window.Razorpay) return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/checkout.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false);
+    document.body.appendChild(s);
+  });
+}
+
 
 type FormValues = z.infer<typeof formSchema>;
 
