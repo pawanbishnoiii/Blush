@@ -60,6 +60,31 @@ export function ReviewForm({
     );
   }
 
+  if (delivered.isLoading) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
+        Checking your orders…
+      </div>
+    );
+  }
+
+  if (delivered.data === false) {
+    return (
+      <div className="rounded-3xl border border-dashed border-border bg-card p-6 text-center">
+        <p className="font-display text-base font-extrabold">Verified reviews only</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          You can rate this product once your order has been delivered.
+        </p>
+        <Link
+          to="/orders"
+          className="mt-4 inline-flex rounded-full border border-border px-5 py-2.5 text-sm font-bold"
+        >
+          View my orders
+        </Link>
+      </div>
+    );
+  }
+
   async function onFiles(files: FileList | null) {
     if (!files?.length) return;
     const picked = Array.from(files).slice(0, 6 - photos.length);
