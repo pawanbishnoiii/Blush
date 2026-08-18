@@ -82,3 +82,153 @@ function SupportPage() {
     </div>
   );
 }
+
+type Ticket = {
+  id: string;
+  subject: string;
+  message: string;
+  category: string;
+  status: string;
+  order_code: string | null;
+  admin_reply: string | null;
+  created_at: string;
+};
+
+const CATEGORIES = ["order", "delivery", "refund", "payment", "product", "general"];
+
+const inputCls =
+  "w-full rounded-2xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring";
+
+/** Raise and follow up on help tickets. */
+function Tickets({ userId }: { userId: string | null }) {
+  const qc = useQueryClient();
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [category, setCategory] = useState("general");
+  const [orderCode, setOrderCode] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const tickets = useQuery({
+    queryKey: ["support_tickets", userId],
+    enabled: Boolean(userId),
+    queryFn: async (): Promise<Ticket[]> => {
+      const { data, error } = await supabase
+        .from("support_tickets")
+        .select("id, subject, message, category, status, order_code, admin_reply, created_at")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Ticket[];
+    },
+  });
+
+  if (!userId) {
+    return (
+      <section className="mt-10 rounded-3xl border border-dashed border-border bg-card p-6 text-center">
+        <p className="font-display text-base font-extrabold">Raise a support ticket</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Sign in to open a ticket and track our replies.
+        </p>
+        <Link
+          to="/auth"
+          className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
+        >
+          Sign in
+        </Link>
+      </section>
+    );
+  }
+
+  async function submit() {
+    if (subject.trim().length < 4 || message.trim().length < 10) {
+      toast.error("Add a short subject and describe the issue");
+      return;
+    }
+    setBusy(true);
+    const { error } = await supabase.from("support_tickets").insert({
+      user_id: userId!,
+      subject: subject.trim(),
+      message: message.trim(),
+      category,
+      order_code: orderCode.trim() || null,
+    });
+    setBusy(false);
+    if (error) return void toast.error(error.message);
+    setSubject("");
+    setMessage("");
+    setOrderCode("");
+    await qc.invalidateQueries({ queryKey: ["support_tickets"] });
+    toast.success("Ticket raised — we'll reply soon");
+  }
+
+  return (
+    <section className="mt-10">
+      <h2 className="font-display text-lg font-extrabold">Raise a ticket</h2>
+      <div className="mt-4 space-y-3 rounded-3xl border border-border bg-card p-5 shadow-soft">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>
+                {c[0]!.toUpperCase() + c.slice(1)}
+              </option>
+            ))}
+          </select>
+          <input
+            value={orderCode}
+            onChange={(e) => setOrderCode(e.target.value)}
+            placeholder="Order code (optional)"
+            className={inputCls}
+          />
+        </div>
+        <input
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="Subject"
+          className={inputCls}
+        />
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={4}
+          placeholder="Tell us what happened"
+          className={cn(inputCls, "resize-y")}
+        />
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void submit()}
+          className="w-full rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground disabled:opacity-60"
+        >
+          {busy ? "Sending…" : "Submit ticket"}
+        </button>
+      </div>
+
+      {(tickets.data?.length ?? 0) > 0 && (
+        <div className="mt-5 space-y-3">
+          <h3 className="font-display text-base font-extrabold">Your tickets</h3>
+          {(tickets.data ?? []).map((t) => (
+            <article key={t.id} className="rounded-2xl border border-border bg-card p-4">
+              <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+                <p className="truncate text-sm font-bold">{t.subject}</p>
+                <span className="shrink-0 rounded-full bg-surface px-3 py-1 text-[11px] font-bold capitalize">
+                  {t.status}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t.category}
+                {t.order_code ? ` · ${t.order_code}` : ""} ·{" "}
+                {new Date(t.created_at).toLocaleDateString("en-IN")}
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">{t.message}</p>
+              {t.admin_reply && (
+                <p className="mt-3 rounded-2xl bg-surface p-3 text-sm">
+                  <span className="font-bold">Blush support: </span>
+                  {t.admin_reply}
+                </p>
+              )}
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
