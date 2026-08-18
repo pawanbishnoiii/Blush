@@ -72,9 +72,11 @@ export const Route = createFileRoute("/api/public/webhooks/shiprocket")({
           .maybeSingle();
         if (!order) return new Response("Unknown order", { status: 404 });
 
-        const update: Record<string, unknown> = { courier: "Shiprocket" };
-        if (status) update["status"] = status;
-        if (awb) update["tracking_number"] = awb;
+        const update: { courier: string; status?: string; tracking_number?: string } = {
+          courier: "Shiprocket",
+        };
+        if (status) update.status = status;
+        if (awb) update.tracking_number = awb;
         await supabaseAdmin.from("orders").update(update).eq("id", order.id);
 
         await supabaseAdmin.from("tracking_events").insert({
