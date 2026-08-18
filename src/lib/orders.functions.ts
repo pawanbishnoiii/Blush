@@ -22,7 +22,7 @@ export const placeOrderSchema = z.object({
   pincode: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6-digit PIN code"),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  paymentMethod: z.enum(["cod", "upi", "card"]),
+  paymentMethod: z.enum(["cod", "upi", "card", "razorpay"]),
   items: z.array(itemSchema).min(1).max(20),
   couponCode: z.string().trim().max(40).optional().or(z.literal("")),
 });
