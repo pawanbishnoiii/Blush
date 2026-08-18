@@ -285,6 +285,14 @@ function Checkout() {
     if (lines.length === 0) return;
     setSubmitting(true);
     try {
+      let paid: { orderId: string; paymentId: string; signature: string } | null = null;
+      if (values.paymentMethod === "razorpay") {
+        paid = await payWithRazorpay(values);
+        if (!paid) {
+          setSubmitting(false);
+          return;
+        }
+      }
       const result = await submitOrder({
         data: {
           ...values,
@@ -294,6 +302,16 @@ function Checkout() {
           ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
         },
       });
+      if (paid) {
+        await confirmPayment({
+          data: {
+            orderCode: result.orderCode,
+            razorpayOrderId: paid.orderId,
+            razorpayPaymentId: paid.paymentId,
+            razorpaySignature: paid.signature,
+          },
+        });
+      }
       await rememberAddress(values);
       clear();
       navigate({ to: "/order/$code", params: { code: result.orderCode } });
@@ -304,6 +322,54 @@ function Checkout() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  /** Opens Razorpay with the amount and shopper details prefilled. */
+  async function payWithRazorpay(values: FormValues) {
+    const session = await startPayment({ data: { amount: Math.round(total * 100) } });
+
+    if (session.mode === "demo") {
+      toast.info("Razorpay is in demo mode", {
+        description: "Add your live keys in Admin → Payments to take real payments.",
+      });
+      return {
+        orderId: session.orderId,
+        paymentId: `demo_pay_${Date.now()}`,
+        signature: "",
+      };
+    }
+
+    const ready = await loadRazorpayScript();
+    if (!ready || !window.Razorpay) {
+      toast.error("Couldn't open Razorpay — check your connection");
+      return null;
+    }
+
+    return new Promise<{ orderId: string; paymentId: string; signature: string } | null>((resolve) => {
+      const rzp = new window.Razorpay!({
+        key: session.keyId,
+        amount: session.amount,
+        currency: "INR",
+        name: "Blush",
+        description: `${lines.length} item${lines.length > 1 ? "s" : ""}`,
+        order_id: session.orderId,
+        prefill: { name: values.fullName, email: values.email, contact: values.phone },
+        notes: { pincode: values.pincode },
+        theme: { color: "#e5487f" },
+        modal: { ondismiss: () => resolve(null) },
+        handler: (res: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) =>
+          resolve({
+            orderId: res.razorpay_order_id,
+            paymentId: res.razorpay_payment_id,
+            signature: res.razorpay_signature,
+          }),
+      });
+      rzp.open();
+    });
   }
 
   if (lines.length === 0) {
