@@ -5,7 +5,7 @@ import { ProductCard } from "@/components/site/ProductCard";
 import { Icon3D } from "@/components/site/Icon3D";
 import { ProductFilterBar } from "@/components/site/ProductFilters";
 import { useProductFilters, type PriceRange } from "@/hooks/useProductFilters";
-import { productsQuery, variantFacetsQuery } from "@/lib/queries";
+import { categoriesQuery, productsQuery, variantFacetsQuery } from "@/lib/queries";
 import { BEAUTY, FASHION, VIBES } from "@/lib/taxonomy";
 import type { Product } from "@/lib/catalog";
 
@@ -45,7 +45,13 @@ function CategoryPage() {
   const { slug } = Route.useParams();
   const products = useQuery(productsQuery);
   const facets = useQuery(variantFacetsQuery);
+  const categories = useQuery(categoriesQuery);
   const title = label(slug);
+
+  const subCategories = useMemo(
+    () => (categories.data ?? []).filter((c: { parent_slug: string | null }) => c.parent_slug === slug),
+    [categories.data, slug],
+  );
 
   const matches = useMemo(() => {
     const all: Product[] = products.data ?? [];
@@ -69,6 +75,24 @@ function CategoryPage() {
 
   const filters = useProductFilters(matches, bounds, facets.data);
   const items = filters.filtered;
+
+  const childSlugs = useMemo(
+    () => new Set(subCategories.map((c: { slug: string }) => c.slug)),
+    [subCategories],
+  );
+
+  /** A parent category also lists everything sitting inside its sub-categories. */
+  const withChildren = useMemo(() => {
+    if (childSlugs.size === 0) return items;
+    const all: Product[] = products.data ?? [];
+    const extra = all.filter(
+      (p) =>
+        !items.some((i) => i.id === p.id) &&
+        (childSlugs.has(p.category_slug ?? "") ||
+          childSlugs.has((p.subcategory ?? "").toLowerCase().replace(/\s+/g, "-"))),
+    );
+    return [...items, ...extra];
+  }, [items, childSlugs, products.data]);
 
   return (
     <div className="mx-auto w-full max-w-[1400px] px-5 pb-24 pt-8 sm:px-8 md:pb-16">
