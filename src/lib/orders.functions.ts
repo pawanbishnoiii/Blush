@@ -190,8 +190,8 @@ export const placeOrder = createServerFn({ method: "POST" })
         total,
         payment_method: data.paymentMethod,
         status: "confirmed",
-        courier: "Esko Express",
-        tracking_number: `EX${Date.now().toString().slice(-10)}`,
+        courier: "Shiprocket",
+        tracking_number: `SR${Date.now().toString().slice(-10)}`,
         eta: eta.toISOString().slice(0, 10),
       })
       .select("id, order_code")
