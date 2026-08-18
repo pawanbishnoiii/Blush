@@ -1,8 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Mail, MessageCircle, Phone } from "lucide-react";
+import { toast } from "sonner";
 import { faqsQuery } from "@/lib/queries";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Icon3D } from "@/components/site/Icon3D";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/account/support")({
   head: () => ({
@@ -24,6 +29,7 @@ const CHANNELS = [
 
 function SupportPage() {
   const faqs = useQuery(faqsQuery);
+  const { user } = useAuth();
 
   return (
     <div className="mx-auto w-full max-w-[800px] px-5 pb-24 pt-8 sm:px-8">
@@ -50,6 +56,8 @@ function SupportPage() {
           </a>
         ))}
       </div>
+
+      <Tickets userId={user?.id ?? null} />
 
       <section className="mt-10">
         <h2 className="font-display text-lg font-extrabold">Frequently asked</h2>
