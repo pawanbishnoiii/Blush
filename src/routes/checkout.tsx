@@ -87,6 +87,8 @@ function Checkout() {
   const productImages = useQuery(productImagesQuery);
   const addresses = useQuery({ ...myAddressesQuery, enabled: Boolean(user) });
   const submitOrder = useServerFn(placeOrder);
+  const startPayment = useServerFn(createRazorpayOrder);
+  const confirmPayment = useServerFn(verifyRazorpayPayment);
   const [locating, setLocating] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -104,7 +106,7 @@ function Checkout() {
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { paymentMethod: "upi", addressLine2: "" },
+    defaultValues: { paymentMethod: "razorpay", addressLine2: "" },
   });
 
   const paymentMethod = watch("paymentMethod");
@@ -437,18 +439,18 @@ function Checkout() {
             <Section step="03" title="Payment">
               <div className="grid gap-3 sm:grid-cols-3">
                 <PayOption
-                  active={paymentMethod === "upi"}
-                  icon={<Smartphone className="h-4 w-4" />}
-                  label="UPI"
-                  hint="GPay, PhonePe, Paytm"
-                  onClick={() => setValue("paymentMethod", "upi")}
+                  active={paymentMethod === "razorpay"}
+                  icon={<CreditCard className="h-4 w-4" />}
+                  label="Pay with Razorpay"
+                  hint="UPI, cards, netbanking, wallets"
+                  onClick={() => setValue("paymentMethod", "razorpay")}
                 />
                 <PayOption
-                  active={paymentMethod === "card"}
-                  icon={<CreditCard className="h-4 w-4" />}
-                  label="Card"
-                  hint="Credit / debit"
-                  onClick={() => setValue("paymentMethod", "card")}
+                  active={paymentMethod === "upi"}
+                  icon={<Smartphone className="h-4 w-4" />}
+                  label="UPI on delivery"
+                  hint="Scan the courier's QR"
+                  onClick={() => setValue("paymentMethod", "upi")}
                 />
                 <PayOption
                   active={paymentMethod === "cod"}
@@ -460,9 +462,9 @@ function Checkout() {
               </div>
               <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
                 <Lock className="h-3.5 w-3.5" />
-                {paymentMethod === "cod"
-                  ? "Keep the exact amount ready — our courier carries a UPI QR as backup."
-                  : "You'll be asked to authorise the payment on the confirmation step."}
+                {paymentMethod === "razorpay"
+                  ? `Razorpay opens with ${inr(total)} and your details already filled in.`
+                  : "Keep the exact amount ready — our courier carries a UPI QR as backup."}
               </p>
             </Section>
           </div>
